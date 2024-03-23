@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Refrigerhater/Public/RHBasePlayer.h"
+#include "Refrigerhater/Public/Player/RHBasePlayer.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,11 +10,20 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
 ARHBasePlayer::ARHBasePlayer()
 {
+	// Initialize player properties
+	Health = 100.f;
+	ResourceCapacity = 10; // Default value
+
+	// Setup mesh component
+	PlayerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerMesh"));
+	RootComponent = PlayerMesh;
+	
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -45,6 +54,8 @@ ARHBasePlayer::ARHBasePlayer()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -52,6 +63,14 @@ void ARHBasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ARHBasePlayer::FireWeapon()
+{
+}
+
+void ARHBasePlayer::GatherResources()
+{
 }
 
 // Called every frame
@@ -65,4 +84,13 @@ void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
+
+void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARHBasePlayer, Health);
+	// Add other replicated properties here with DOREPLIFETIME macro
+}
+
 

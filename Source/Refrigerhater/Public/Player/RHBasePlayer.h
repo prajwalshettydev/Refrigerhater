@@ -13,6 +13,17 @@ class REFRIGERHATER_API ARHBasePlayer : public ACharacter
 
 public:
 
+	// Player health
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	float Health;
+
+	// Player resource capacity
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 ResourceCapacity;
+
+	// Mesh Component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* PlayerMesh;
 	
 	/** Returns TopDownCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
@@ -24,6 +35,8 @@ public:
 
 private:
 	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;
@@ -37,6 +50,16 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+
+	
+	// Function to fire weapon
+	UFUNCTION(BlueprintCallable)
+	void FireWeapon();
+
+	// Function to gather resources
+	UFUNCTION(BlueprintCallable)
+	void GatherResources();
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

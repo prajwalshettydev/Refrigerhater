@@ -12,6 +12,10 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "Input/RHInputConfigData.h"
+
 
 // Sets default values
 ARHBasePlayer::ARHBasePlayer()
@@ -79,10 +83,60 @@ void ARHBasePlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
+{
+}
+
+void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
+{
+}
+
+void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
+{
+}
+
+void ARHBasePlayer::Generate(const FInputActionValue& InputActionValue)
+{
+}
+
+void ARHBasePlayer::MoveUpDown(const FInputActionValue& InputActionValue)
+{
+}
+
+void ARHBasePlayer::ChangeMoveSpeed(const FInputActionValue& InputActionValue)
+{
+}
+
 // Called to bind functionality to input
 void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	/* new input system */
+	// Get the player controller
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	
+	// // Get the local player subsystem
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+	// Clear out existing mapping, and add our mapping
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(InputMapping, 0);
+	
+	// Get the EnhancedInputComponent
+	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	
+	//@GPT: Keep in mind that the check macro should be used for conditions that should never fail during runtime. It is a debugging aid, and in shipping builds, the check is removed. Make sure to fix any issues that cause the check to fail before releasing your game.
+	check(PEI && "PlayerInputComponent is not initialized");
+	check(InputActions && "PlayerInputActions is not initialized");
+	
+	// Bind the actions
+	PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ARHBasePlayer::Move);
+	PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ARHBasePlayer::Look);
+	PEI->BindAction(InputActions->InputTap, ETriggerEvent::Triggered, this, &ARHBasePlayer::Tap);
+	PEI->BindAction(InputActions->InputGenerate, ETriggerEvent::Started, this, &ARHBasePlayer::Generate);
+	PEI->BindAction(InputActions->InputMoveUpDown, ETriggerEvent::Triggered, this, &ARHBasePlayer::MoveUpDown);
+	PEI->BindAction(InputActions->InputMoveSpeed, ETriggerEvent::Triggered, this, &ARHBasePlayer::ChangeMoveSpeed);
+	
 }
 
 void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -90,7 +144,5 @@ void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARHBasePlayer, Health);
-	// Add other replicated properties here with DOREPLIFETIME macro
+	// Add oth
 }
-
-

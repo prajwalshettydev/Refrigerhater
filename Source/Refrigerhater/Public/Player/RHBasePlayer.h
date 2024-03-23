@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "RHBasePlayer.generated.h"
 
+class UCameraComponent;
 UCLASS()
 class REFRIGERHATER_API ARHBasePlayer : public ACharacter
 {
@@ -44,8 +46,15 @@ private:
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+	
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputMappingContext* InputMapping;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class URHInputConfigData* InputActions;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -63,6 +72,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void Move(const FInputActionValue& InputActionValue);
+	void Look(const FInputActionValue& InputActionValue);
+	void Tap(const FInputActionValue& InputActionValue);
+	void Generate(const FInputActionValue& InputActionValue);
+	void MoveUpDown(const FInputActionValue& InputActionValue);
+	void ChangeMoveSpeed(const FInputActionValue& InputActionValue);
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

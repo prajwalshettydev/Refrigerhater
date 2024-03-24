@@ -26,11 +26,11 @@ ARHBasePlayer::ARHBasePlayer()
 	ResourceCapacity = 10; // Default value
 
 	// Setup mesh component
-	PlayerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerMesh"));
-	RootComponent = PlayerMesh;
+	//PlayerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerMesh"));
 	
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	RootComponent = GetCapsuleComponent();
 
 	// // Don't rotate character to camera direction
 	// bUseControllerRotationPitch = false;
@@ -71,6 +71,15 @@ void ARHBasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AController* MyController = GetController();
+	if (MyController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Controller is still null in BeginPlay"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Got controller: %s"), *MyController->GetName());
+	}
 }
 
 void ARHBasePlayer::FireWeapon()
@@ -92,12 +101,6 @@ void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 
 	
 	const FVector2D MoveValue = InputActionValue.Get<FVector2D>();
-	
-	if (Controller != nullptr)
-	{
-		UE_LOG(LogPlayer, Log, TEXT("Input reciegedss: %f, %f"), MoveValue.X,
-				   MoveValue.Y);
-	}
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
 	ControlRot.Roll = 0.0f;

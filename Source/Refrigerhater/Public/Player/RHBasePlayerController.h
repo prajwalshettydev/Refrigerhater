@@ -13,4 +13,9 @@ UCLASS()
 class REFRIGERHATER_API ARHBasePlayerController : public APlayerController
 {
 	GENERATED_BODY()
+	
+	virtual void OnPossess(APawn* InPawn) override;
+
+public:
+	ARHBasePlayerController();
 };

@@ -14,6 +14,7 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "RHCustomLog.h"
 #include "Input/RHInputConfigData.h"
 
 
@@ -31,10 +32,13 @@ ARHBasePlayer::ARHBasePlayer()
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-	// Don't rotate character to camera direction
-	bUseControllerRotationPitch = false;
+	// // Don't rotate character to camera direction
+	// bUseControllerRotationPitch = false;
+	// bUseControllerRotationYaw = false;
+	// bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
@@ -85,14 +89,35 @@ void ARHBasePlayer::Tick(float DeltaTime)
 
 void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 {
+
+	
+	const FVector2D MoveValue = InputActionValue.Get<FVector2D>();
+	
+	if (Controller != nullptr)
+	{
+		UE_LOG(LogPlayer, Log, TEXT("Input reciegedss: %f, %f"), MoveValue.X,
+				   MoveValue.Y);
+	}
+	FRotator ControlRot = GetControlRotation();
+	ControlRot.Pitch = 0.0f;
+	ControlRot.Roll = 0.0f;
+	
+	AddMovementInput(ControlRot.Vector(), MoveValue.Y);
+	
+	// x = forward (Red), y is right (Green), z is up (Blue)
+	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
+	AddMovementInput(RightVector, MoveValue.X);
+	//}
 }
 
 void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
 {
+	
 }
 
 void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 {
+	
 }
 
 void ARHBasePlayer::Generate(const FInputActionValue& InputActionValue)
@@ -125,7 +150,7 @@ void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	// Get the EnhancedInputComponent
 	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	
-	//@GPT: Keep in mind that the check macro should be used for conditions that should never fail during runtime. It is a debugging aid, and in shipping builds, the check is removed. Make sure to fix any issues that cause the check to fail before releasing your game.
+	//To keep in mind that the check macro should be used for conditions that should never fail during runtime. It is a debugging aid, and in shipping builds, the check is removed. Make sure to fix any issues that cause the check to fail before releasing your game.
 	check(PEI && "PlayerInputComponent is not initialized");
 	check(InputActions && "PlayerInputActions is not initialized");
 	

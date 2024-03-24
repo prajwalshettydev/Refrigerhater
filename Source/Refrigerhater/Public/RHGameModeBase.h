@@ -16,8 +16,10 @@ class REFRIGERHATER_API ARHGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	//
-	// UPROPERTY()
-	// USSaveGame* CurrentSaveGame;
-
+public:
+	ARHGameModeBase();
+	
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	
+	virtual void StartPlay() override;
 };

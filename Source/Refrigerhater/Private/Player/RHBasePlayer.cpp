@@ -15,12 +15,72 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "RHCustomLog.h"
+#include "Components/TextBlock.h"
+#include "Components/WidgetComponent.h"
 #include "Input/RHInputConfigData.h"
+#include "Weapon/THProjectile.h"
 
+
+
+// List of potential player names
+static const TArray<FString> PossiblePlayerNames = {
+	TEXT("Maverick"),
+	TEXT("Prajwal"),
+	TEXT("Asheen"),
+	TEXT("Soorya"),
+	TEXT("Prince"),
+	TEXT("Phoenix")
+};
+
+void ARHBasePlayer::ServerFireWeapon_Implementation()
+{
+	MulticastFireWeapon();
+}
+
+bool ARHBasePlayer::ServerFireWeapon_Validate()
+{
+	return true; // Add validation logic if needed
+}
+
+void ARHBasePlayer::MulticastFireWeapon_Implementation()
+{
+	if (ProjectileClass != nullptr)
+	{
+		FVector MuzzleLocation = GetActorLocation() + FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
+		FRotator MuzzleRotation = GetControlRotation();
+
+		UWorld* World = GetWorld();
+		if (World != nullptr)
+		{
+			ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation);
+			// Additional setup for your projectile can go here
+		}
+	}
+}
+
+void ARHBasePlayer::ReceiveDamage(float DamageAmount)
+{
+	if (HasAuthority())
+	{
+		Health -= DamageAmount;
+		if (Health <= 0)
+		{
+			// Handle death
+		}
+
+		OnRep_Health(); // Manually call to update locally, replication handles remote updates
+	}
+}
+
+void ARHBasePlayer::OnRep_Health()
+{
+	// React to health changes, e.g., update UI
+}
 
 // Sets default values
 ARHBasePlayer::ARHBasePlayer()
 {
+	bReplicates = true;
 	// Initialize player properties
 	Health = 100.f;
 	ResourceCapacity = 10; // Default value
@@ -31,6 +91,13 @@ ARHBasePlayer::ARHBasePlayer()
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	RootComponent = GetCapsuleComponent();
+
+	// Create a skeletal mesh component and set it as the primary mesh for the player character
+	// PlayerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerMesh"));
+	// PlayerMesh->SetupAttachment(RootComponent);
+
+	// Assuming the parent class has already created a Skeletal Mesh Component named "CharacterMesh0"
+	PlayerMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 
 	// // Don't rotate character to camera direction
 	// bUseControllerRotationPitch = false;
@@ -63,7 +130,17 @@ ARHBasePlayer::ARHBasePlayer()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	
+
+	// Create the widget component and attach it to the player's root component
+	NameTagComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("NameTagComponent"));
+	NameTagComponent->SetupAttachment(RootComponent);
+	NameTagComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	NameTagComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f)); // Adjust as necessary
+	NameTagComponent->SetDrawSize(FVector2D(200.0f, 50.0f)); // Adjust as necessary
+
+	// Ensure that the name tag component replicates
+	NameTagComponent->SetIsReplicated(true);
+
 }
 
 // Called when the game starts or when spawned
@@ -80,10 +157,44 @@ void ARHBasePlayer::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Got controller: %s"), *MyController->GetName());
 	}
+
+	if(HasAuthority())
+	{
+		// Set default player name and color
+		PlayerName = TEXT("Player");
+		PlayerColor = FLinearColor::Red;
+		UE_LOG(LogPlayer, Warning, TEXT("PlayerColor sett"));
+
+
+		// Randomize player name and color
+		FString RandomPlayerName = PossiblePlayerNames[FMath::RandRange(0, PossiblePlayerNames.Num() - 1)];
+		RandomPlayerName.AppendInt(FMath::RandRange(10, 99));
+		PlayerName = RandomPlayerName;
+
+		// Generate a random bright color
+		FLinearColor RandomPlayerColor = FLinearColor(
+			FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Red
+			FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Green
+			FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Blue
+			1.0f                           // Alpha set to 1.0 (fully opaque)
+		);
+		PlayerColor = RandomPlayerColor;
+		
+		//OnRep_PlayerName();
+		//OnRep_PlayerColor();
+	}
 }
 
 void ARHBasePlayer::FireWeapon()
 {
+	if (HasAuthority())
+	{
+		MulticastFireWeapon();
+	}
+	else
+	{
+		ServerFireWeapon();
+	}
 }
 
 void ARHBasePlayer::GatherResources()
@@ -105,11 +216,11 @@ void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 	ControlRot.Pitch = 0.0f;
 	ControlRot.Roll = 0.0f;
 	
-	AddMovementInput(ControlRot.Vector(), MoveValue.Y);
+	AddMovementInput(ControlRot.Vector(), -MoveValue.Y);
 	
 	// x = forward (Red), y is right (Green), z is up (Blue)
 	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
-	AddMovementInput(RightVector, MoveValue.X);
+	AddMovementInput(RightVector, -MoveValue.X);
 	//}
 }
 
@@ -172,5 +283,59 @@ void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARHBasePlayer, Health);
+	DOREPLIFETIME(ARHBasePlayer, PlayerName);
+	DOREPLIFETIME(ARHBasePlayer, PlayerColor);
 	// Add oth
+}
+
+
+void ARHBasePlayer::OnRep_PlayerName()
+{
+	UE_LOG(LogPlayer, Warning, TEXT("OnRep_PlayerName"));
+	// Update the widget with the new player name
+	UUserWidget* NameTagWidget = NameTagComponent->GetUserWidgetObject();
+	if (NameTagWidget)
+	{
+		// Assuming you have a TextBlock named "NameText" in your widget
+		UTextBlock* NameText = Cast<UTextBlock>(NameTagWidget->GetWidgetFromName(TEXT("NameText")));
+		if (NameText)
+		{
+			NameText->SetText(FText::FromString(PlayerName));
+		}
+	}
+}
+
+void ARHBasePlayer::OnRep_PlayerColor()
+{
+	UE_LOG(LogPlayer, Warning, TEXT("OnRep_PlayerColor"));
+	// Update the player material with the new color
+	UpdatePlayerColor();
+}
+
+void ARHBasePlayer::UpdatePlayerColor()
+{
+	if (PlayerMesh && PlayerMaterialInstance)
+	{
+		// Create a dynamic material instance from the assigned material instance
+		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(PlayerMaterialInstance, this);
+        
+		if (DynamicMaterialInstance)
+		{
+			// Apply the dynamic material instance to the player mesh
+			PlayerMesh->SetMaterial(0, DynamicMaterialInstance);
+            
+			// Update the color on the dynamic material instance
+			DynamicMaterialInstance->SetVectorParameterValue(FName("BaseColor"), PlayerColor);
+            
+			UE_LOG(LogPlayer, Warning, TEXT("Player color updated."));
+		}
+		else
+		{
+			UE_LOG(LogPlayer, Warning, TEXT("Failed to create a dynamic material instance."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogPlayer, Warning, TEXT("PlayerMesh or PlayerMaterialInstance is not set."));
+	}
 }

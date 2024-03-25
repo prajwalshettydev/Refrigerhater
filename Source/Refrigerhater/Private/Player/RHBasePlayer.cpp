@@ -139,8 +139,19 @@ ARHBasePlayer::ARHBasePlayer()
 	NameTagComponent->SetDrawSize(FVector2D(200.0f, 50.0f)); // Adjust as necessary
 
 	// Ensure that the name tag component replicates
-	NameTagComponent->SetIsReplicated(true);
+	//NameTagComponent->SetIsReplicated(true);
 
+}
+
+void ARHBasePlayer::InitializeNameTag()
+{
+	
+	// Randomize player name and color
+	FString RandomPlayerName = PossiblePlayerNames[FMath::RandRange(0, PossiblePlayerNames.Num() - 1)] + " ";
+	RandomPlayerName.AppendInt(FMath::RandRange(10, 99));
+	PlayerName = RandomPlayerName;
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -161,27 +172,34 @@ void ARHBasePlayer::BeginPlay()
 	if(HasAuthority())
 	{
 		// Set default player name and color
-		PlayerName = TEXT("Player");
-		PlayerColor = FLinearColor::Red;
+		// PlayerName = TEXT("Player");
+		// PlayerColor = FLinearColor::Red;
 		UE_LOG(LogPlayer, Warning, TEXT("PlayerColor sett"));
 
 
-		// Randomize player name and color
-		FString RandomPlayerName = PossiblePlayerNames[FMath::RandRange(0, PossiblePlayerNames.Num() - 1)];
-		RandomPlayerName.AppendInt(FMath::RandRange(10, 99));
-		PlayerName = RandomPlayerName;
 
-		// Generate a random bright color
-		FLinearColor RandomPlayerColor = FLinearColor(
-			FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Red
-			FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Green
-			FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Blue
-			1.0f                           // Alpha set to 1.0 (fully opaque)
-		);
-		PlayerColor = RandomPlayerColor;
+		// // Generate a random bright color
+		// FLinearColor RandomPlayerColor = FLinearColor(
+		// 	FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Red
+		// 	FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Green
+		// 	FMath::FRandRange(0.7f, 1.0f), // Random float between 0.5 and 1.0 for Blue
+		// 	1.0f                           // Alpha set to 1.0 (fully opaque)
+		// );
+		// PlayerColor = RandomPlayerColor;
+
 		
+		// Randomize player color using HSV
+		const uint8 Hue = FMath::RandRange(0, 255);
+		constexpr uint8 Saturation = 255;
+		const uint8 Value = FMath::RandRange(160, 255); // Range from 180 to 255 to ensure brightness
+
+		PlayerColor = FLinearColor::MakeFromHSV8(Hue, Saturation, Value);
 		//OnRep_PlayerName();
 		//OnRep_PlayerColor();
+
+		// Delay the initialization of the name tag to ensure all components are ready
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 0.5f, false);
 	}
 }
 
@@ -296,12 +314,21 @@ void ARHBasePlayer::OnRep_PlayerName()
 	UUserWidget* NameTagWidget = NameTagComponent->GetUserWidgetObject();
 	if (NameTagWidget)
 	{
-		// Assuming you have a TextBlock named "NameText" in your widget
+		UE_LOG(LogPlayer, Warning, TEXT("NameTagWidget found."));
 		UTextBlock* NameText = Cast<UTextBlock>(NameTagWidget->GetWidgetFromName(TEXT("NameText")));
 		if (NameText)
 		{
+			UE_LOG(LogPlayer, Warning, TEXT("NameText found, setting text to: %s"), *PlayerName);
 			NameText->SetText(FText::FromString(PlayerName));
 		}
+		else
+		{
+			UE_LOG(LogPlayer, Warning, TEXT("NameText not found."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogPlayer, Warning, TEXT("NameTagWidget not found."));
 	}
 }
 

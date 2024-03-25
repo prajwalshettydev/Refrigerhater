@@ -68,6 +68,8 @@ public:
 	ARHBasePlayer();
 
 private:
+	UFUNCTION(BlueprintCallable)
+	void InitializeNameTag();
 	
 	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

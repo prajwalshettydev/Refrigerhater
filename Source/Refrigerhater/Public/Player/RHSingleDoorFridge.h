@@ -12,7 +12,6 @@ class REFRIGERHATER_API ARHSingleDoorFridge : public ARHBasePlayer
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ARHSingleDoorFridge();
 
 protected:

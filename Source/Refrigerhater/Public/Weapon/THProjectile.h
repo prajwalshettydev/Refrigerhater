@@ -14,7 +14,6 @@ class REFRIGERHATER_API ATHProjectile : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	ATHProjectile();
 
 protected:

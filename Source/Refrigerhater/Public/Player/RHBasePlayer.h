@@ -17,7 +17,6 @@ class REFRIGERHATER_API ARHBasePlayer : public ACharacter
 
 public:
 
-	// Existing health declaration
 	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Health")
 	float Health;
 
@@ -37,6 +36,7 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
+	void ProjectileSpawn(const FVector& Direction);
 	void ReceiveDamage(float DamageAmount);
 	UFUNCTION()
 	void OnRep_Health();

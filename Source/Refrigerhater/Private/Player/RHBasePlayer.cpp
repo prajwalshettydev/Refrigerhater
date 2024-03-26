@@ -139,14 +139,40 @@ void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
 {
 	if (ProjectileClass != nullptr)
 	{
-		FVector MuzzleLocation = GetActorLocation() + FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
-		FRotator MuzzleRotation = GetControlRotation();
-
-		UWorld* World = GetWorld();
-		if (World != nullptr)
+		// Check if this is the owning client and skip the following logic if it is
+		if (IsLocallyControlled())
 		{
-			ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation);
-			// Additional setup for your projectile can go here
+			return;
+		}
+		
+		ProjectileSpawn(Direction);
+	}
+}
+
+void ARHBasePlayer::ProjectileSpawn(const FVector& Direction)
+{
+	// The muzzle location is typically where you want the projectile to spawn
+	FVector MuzzleLocation = GetActorLocation() + FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
+        
+	// Instead of using GetControlRotation, use the direction to create a rotation
+	// The direction vector should point outwards from the front of the projectile
+	FRotator MuzzleRotation = Direction.Rotation();
+        
+	UWorld* World = GetWorld();
+	if (World != nullptr)
+	{
+		// Spawn the projectile at the muzzle.
+		ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation);
+		if (Projectile)
+		{
+			// Set the projectile's direction to the fire direction
+			Projectile->SetActorRotation(MuzzleRotation);
+                
+			// // If the projectile has a Projectile Movement component, you may also need to directly set the velocity
+			// if (Projectile->ProjectileMovement)
+			// {
+			// 	Projectile->ProjectileMovement->Velocity = FireDirection * Projectile->ProjectileMovement->InitialSpeed;
+			// }
 		}
 	}
 }
@@ -177,11 +203,11 @@ void ARHBasePlayer::FireWeapon(const FVector& Direction)
 	if (HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("has autorityy"));
-		MulticastFireWeapon(Direction);
+		//MulticastFireWeapon(Direction);
+		ProjectileSpawn(Direction);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("nadaaa"));
 		ServerFireWeapon(Direction);
 	}
 }
@@ -217,38 +243,38 @@ void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
 
 void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Recieved tap"));
-	FVector2D ScreenPosition = InputActionValue.Get<FVector2D>();
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-    
-	if (PlayerController)
+	float MouseLocationX, MouseLocationY;
+	if (PlayerController && PlayerController->GetMousePosition(MouseLocationX, MouseLocationY))
 	{
+		FVector2D MousePosition = FVector2D(MouseLocationX, MouseLocationY);
+
 		FVector CameraLocation;
 		FRotator CameraRotation;
 		PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation); // Get the camera position and rotation
-        
+
 		FVector WorldDirection;
-		PlayerController->DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, CameraLocation, WorldDirection); // Calculate world direction
-        
+		PlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, CameraLocation, WorldDirection); // Calculate world direction
+
 		FVector EndPoint = CameraLocation + (WorldDirection * 10000); // Adjust length as needed
-        
+
 		FHitResult HitResult;
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(this); // Ignore the player
-        
+
 		// Perform the raycast
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, CameraLocation, EndPoint, ECC_Visibility, QueryParams))
 		{
 			// We hit something
 			FVector HitLocation = HitResult.Location;
 			FVector FireDirection = (HitLocation - GetActorLocation()).GetSafeNormal();
-            
-			// Optional: Draw debug line
+
+			// Optional: Draw debug line from camera to hit location
 			if (GEngine)
 			{
-				DrawDebugLine(GetWorld(), GetActorLocation(), HitLocation, FColor::Red, false, 5.0f, 0, 1.0f);
+				DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 5.0f);
 			}
-            
+
 			// Now that we have the direction, fire the weapon in that direction
 			FireWeapon(FireDirection);
 		}

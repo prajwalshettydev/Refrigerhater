@@ -52,6 +52,12 @@ void ATHProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 
 		// Add your effects for the hit, like a sound or a particle effect
 
+		// Draw a debug sphere at the hit location
+		if (GEngine)
+		{
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 32.0f, 12, FColor::Red, false, 5.0f);
+		}
+
 		// Destroy the projectile
 		Destroy();
 	}

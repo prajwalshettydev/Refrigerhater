@@ -42,10 +42,10 @@ public:
 	void OnRep_Health();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerFireWeapon();
+	void ServerFireWeapon(const FVector& Direction);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFireWeapon();
+	void MulticastFireWeapon(const FVector& Direction);
 
 	// Replicated properties for player name and color
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerName)
@@ -83,10 +83,6 @@ private:
 	
 
 protected:
-	
-	// Function to update the material color of the player
-	void UpdatePlayerColor();
-
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 	class UInputMappingContext* InputMapping;
@@ -106,11 +102,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-
 	
 	// Function to fire weapon
 	UFUNCTION(BlueprintCallable)
-	void FireWeapon();
+	void FireWeapon(const FVector& Direction);
 
 	// Function to gather resources
 	UFUNCTION(BlueprintCallable)

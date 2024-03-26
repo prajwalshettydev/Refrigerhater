@@ -21,10 +21,12 @@ void ARHBasePlayerController::OnPossess(APawn* InPawn)
 	{
 		UE_LOG(LogPlayer, Error, TEXT("Player not possed?"));
 	}
-
+	
 }
 
 ARHBasePlayerController::ARHBasePlayerController()
 {
-	
+	bShowMouseCursor = true;
+	bEnableClickEvents = true;
+	bEnableMouseOverEvents = true;
 }

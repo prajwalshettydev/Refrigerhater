@@ -149,7 +149,12 @@ void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
 	}
 }
 
-void ARHBasePlayer::ProjectileSpawn(const FVector& Direction)
+
+/**
+ * Spawns projectile in the server
+ * @param Direction 
+ */
+void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
 	// The muzzle location is typically where you want the projectile to spawn
 	FVector MuzzleLocation = GetActorLocation() + FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
@@ -167,7 +172,7 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction)
 		{
 			// Set the projectile's direction to the fire direction
 			Projectile->SetActorRotation(MuzzleRotation);
-                
+			UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 			// // If the projectile has a Projectile Movement component, you may also need to directly set the velocity
 			// if (Projectile->ProjectileMovement)
 			// {

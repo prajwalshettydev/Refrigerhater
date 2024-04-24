@@ -36,7 +36,7 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
-	void ProjectileSpawn(const FVector& Direction);
+	void ProjectileSpawn(const FVector& Direction) const;
 	void ReceiveDamage(float DamageAmount);
 	UFUNCTION()
 	void OnRep_Health();

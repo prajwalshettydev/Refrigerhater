@@ -18,4 +18,5 @@ class REFRIGERHATER_API ARHBasePlayerController : public APlayerController
 
 public:
 	ARHBasePlayerController();
+	void BeginPlay();
 };

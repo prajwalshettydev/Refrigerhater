@@ -124,10 +124,17 @@ void ARHBasePlayer::Tick(float DeltaTime)
 }
 #pragma endregion
 
+
+/**
+ * Called on the client, but executed on the server.
+ * 
+ * @param Direction 
+ */
 void ARHBasePlayer::ServerFireWeapon_Implementation(const FVector& Direction)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server firingggggg"));
-	MulticastFireWeapon(Direction);
+	//MulticastFireWeapon(Direction);
+	ProjectileSpawn(Direction);
 }
 
 bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
@@ -162,6 +169,8 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 	// Instead of using GetControlRotation, use the direction to create a rotation
 	// The direction vector should point outwards from the front of the projectile
 	FRotator MuzzleRotation = Direction.Rotation();
+
+	
         
 	UWorld* World = GetWorld();
 	if (World != nullptr)
@@ -205,6 +214,7 @@ void ARHBasePlayer::OnRep_Health()
 
 void ARHBasePlayer::FireWeapon(const FVector& Direction)
 {
+	//i.e in this context, is server? which will ALWAYS be false as the FIREWEAPON is usually called on player keyboard ip on client
 	if (HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("has autorityy"));
@@ -213,6 +223,7 @@ void ARHBasePlayer::FireWeapon(const FVector& Direction)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 		ServerFireWeapon(Direction);
 	}
 }
@@ -277,9 +288,10 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 			// Optional: Draw debug line from camera to hit location
 			if (GEngine)
 			{
-				DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 5.0f);
+				DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 20.0f);
 			}
 
+			DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.Location, FColor::Red, true, -1.0f, 0, 5.0f);
 			// Now that we have the direction, fire the weapon in that direction
 			FireWeapon(FireDirection);
 		}

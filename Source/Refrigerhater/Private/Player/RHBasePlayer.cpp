@@ -28,9 +28,27 @@ static const TArray<FString> PossiblePlayerNames = {
 	TEXT("Maverick"),
 	TEXT("Prajwal"),
 	TEXT("Asheen"),
-	TEXT("Soorya"),
-	TEXT("Prince"),
-	TEXT("Phoenix")
+	TEXT("Phoenix"),
+	TEXT("Vortex"),
+	TEXT("Blaze"),
+	TEXT("Striker"),
+	TEXT("Orion"),
+	TEXT("Talon"),
+	TEXT("Raven"),
+	TEXT("Zephyr"),
+	TEXT("Drifter"),
+	TEXT("Marauder"),
+	TEXT("Shadow"),
+	TEXT("Fury"),
+	TEXT("Raptor"),
+	TEXT("Sable"),
+	TEXT("Volt"),
+	TEXT("Phantom"),
+	TEXT("Specter"),
+	TEXT("Rogue"),
+	TEXT("Eclipse"),
+	TEXT("Titan"),
+	TEXT("Nomad")
 };
 
 // Sets default values
@@ -158,13 +176,13 @@ void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
 
 
 /**
- * Spawns projectile in the server
+ * Spawns projectile in the server 
  * @param Direction 
  */
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
 	// The muzzle location is typically where you want the projectile to spawn
-	FVector MuzzleLocation = GetActorLocation() + FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
+	FVector MuzzleLocation = GetActorLocation(); //+ FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
         
 	// Instead of using GetControlRotation, use the direction to create a rotation
 	// The direction vector should point outwards from the front of the projectile
@@ -179,6 +197,20 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 		ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation);
 		if (Projectile)
 		{
+			// Disable collision with the player immediately on spawn
+			Projectile->SetActorEnableCollision(false);
+    
+			// Set a timer to re-enable collision after a very short delay
+			FTimerHandle TimerHandle;
+			World->GetTimerManager().SetTimer(TimerHandle, [Projectile]()
+			{
+				if (Projectile)
+				{
+					Projectile->SetActorEnableCollision(true);
+				}
+			}, 0.1f, false);
+			
+			
 			// Set the projectile's direction to the fire direction
 			Projectile->SetActorRotation(MuzzleRotation);
 			UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
@@ -187,6 +219,12 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 			// {
 			// 	Projectile->ProjectileMovement->Velocity = FireDirection * Projectile->ProjectileMovement->InitialSpeed;
 			// }
+
+			Projectile->SetLifeSpan(5.0f);
+			
+			// Draw a debug line for visualization
+			DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0, 5.0f);
+			DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
 		}
 	}
 }

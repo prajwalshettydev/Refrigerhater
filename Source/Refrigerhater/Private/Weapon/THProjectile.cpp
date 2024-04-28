@@ -25,6 +25,8 @@ ATHProjectile::ATHProjectile()
 
 	// Set the scale of the collision capsule
 	ProjectileMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+	
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned

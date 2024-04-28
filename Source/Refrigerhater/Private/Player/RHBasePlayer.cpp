@@ -28,9 +28,27 @@ static const TArray<FString> PossiblePlayerNames = {
 	TEXT("Maverick"),
 	TEXT("Prajwal"),
 	TEXT("Asheen"),
-	TEXT("Soorya"),
-	TEXT("Prince"),
-	TEXT("Phoenix")
+	TEXT("Phoenix"),
+	TEXT("Vortex"),
+	TEXT("Blaze"),
+	TEXT("Striker"),
+	TEXT("Orion"),
+	TEXT("Talon"),
+	TEXT("Raven"),
+	TEXT("Zephyr"),
+	TEXT("Drifter"),
+	TEXT("Marauder"),
+	TEXT("Shadow"),
+	TEXT("Fury"),
+	TEXT("Raptor"),
+	TEXT("Sable"),
+	TEXT("Volt"),
+	TEXT("Phantom"),
+	TEXT("Specter"),
+	TEXT("Rogue"),
+	TEXT("Eclipse"),
+	TEXT("Titan"),
+	TEXT("Nomad")
 };
 
 // Sets default values
@@ -124,10 +142,17 @@ void ARHBasePlayer::Tick(float DeltaTime)
 }
 #pragma endregion
 
+
+/**
+ * Called on the client, but executed on the server.
+ * 
+ * @param Direction 
+ */
 void ARHBasePlayer::ServerFireWeapon_Implementation(const FVector& Direction)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server firingggggg"));
-	MulticastFireWeapon(Direction);
+	//MulticastFireWeapon(Direction);
+	ProjectileSpawn(Direction);
 }
 
 bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
@@ -151,17 +176,19 @@ void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
 
 
 /**
- * Spawns projectile in the server
+ * Spawns projectile in the server 
  * @param Direction 
  */
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
 	// The muzzle location is typically where you want the projectile to spawn
-	FVector MuzzleLocation = GetActorLocation() + FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
+	FVector MuzzleLocation = GetActorLocation(); //+ FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
         
 	// Instead of using GetControlRotation, use the direction to create a rotation
 	// The direction vector should point outwards from the front of the projectile
 	FRotator MuzzleRotation = Direction.Rotation();
+
+	
         
 	UWorld* World = GetWorld();
 	if (World != nullptr)
@@ -170,6 +197,20 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 		ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation);
 		if (Projectile)
 		{
+			// Disable collision with the player immediately on spawn
+			Projectile->SetActorEnableCollision(false);
+    
+			// Set a timer to re-enable collision after a very short delay
+			FTimerHandle TimerHandle;
+			World->GetTimerManager().SetTimer(TimerHandle, [Projectile]()
+			{
+				if (Projectile)
+				{
+					Projectile->SetActorEnableCollision(true);
+				}
+			}, 0.1f, false);
+			
+			
 			// Set the projectile's direction to the fire direction
 			Projectile->SetActorRotation(MuzzleRotation);
 			UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
@@ -178,6 +219,12 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 			// {
 			// 	Projectile->ProjectileMovement->Velocity = FireDirection * Projectile->ProjectileMovement->InitialSpeed;
 			// }
+
+			Projectile->SetLifeSpan(5.0f);
+			
+			// Draw a debug line for visualization
+			DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0, 5.0f);
+			DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
 		}
 	}
 }
@@ -205,6 +252,7 @@ void ARHBasePlayer::OnRep_Health()
 
 void ARHBasePlayer::FireWeapon(const FVector& Direction)
 {
+	//i.e in this context, is server? which will ALWAYS be false as the FIREWEAPON is usually called on player keyboard ip on client
 	if (HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("has autorityy"));
@@ -213,6 +261,7 @@ void ARHBasePlayer::FireWeapon(const FVector& Direction)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 		ServerFireWeapon(Direction);
 	}
 }
@@ -277,9 +326,10 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 			// Optional: Draw debug line from camera to hit location
 			if (GEngine)
 			{
-				DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 5.0f);
+				DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 20.0f);
 			}
 
+			DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.Location, FColor::Red, true, -1.0f, 0, 5.0f);
 			// Now that we have the direction, fire the weapon in that direction
 			FireWeapon(FireDirection);
 		}

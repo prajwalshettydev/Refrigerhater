@@ -30,3 +30,25 @@ ARHBasePlayerController::ARHBasePlayerController()
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
 }
+
+void ARHBasePlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// if (IsLocalController())
+	// {
+	// 	if (IsLocalPlayerController())
+	// 	{
+	// 		if (HasAuthority())
+	// 		{
+	// 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("This is the Server"));
+	// 		}
+	// 		else
+	// 		{
+	// 			static int ClientID = 1;
+	// 			FString ClientText = FString::Printf(TEXT("This is Client %d"), ClientID++);
+	// 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, ClientText);
+	// 		}
+	// 	}
+	// }
+}

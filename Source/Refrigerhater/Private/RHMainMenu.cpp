@@ -8,6 +8,22 @@ void URHMainMenu::NativeConstruct()
 	gameInstance = GetGameInstance<URHEosGameInstance>();
 
 	loginButton->OnClicked.AddDynamic(this, &URHMainMenu::LoginButtonOnClick);
+	createLobbyButton->OnClicked.AddDynamic(this, &URHMainMenu::CreateLobbyButtonOnClick);
+	findLobbyButton->OnClicked.AddDynamic(this, &URHMainMenu::FindLobbyButtonOnClick);
+}
+
+void URHMainMenu::CreateLobbyButtonOnClick()
+{
+	if (!gameInstance)
+		return;
+	gameInstance->CreateSession();
+}
+
+void URHMainMenu::FindLobbyButtonOnClick()
+{
+	if (!gameInstance)
+		return;
+	gameInstance->FindSession();
 }
 
 void URHMainMenu::LoginButtonOnClick()

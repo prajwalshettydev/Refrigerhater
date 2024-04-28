@@ -17,8 +17,16 @@ protected:
 	class URHEosGameInstance* gameInstance;
 private:
 	UPROPERTY(meta = (BindWidget))
-	class UButton* loginButton;
+	class UButton* loginButton;	
+	UPROPERTY(meta = (BindWidget))
+	class UButton* createLobbyButton;	
+	UPROPERTY(meta = (BindWidget))
+	class UButton* findLobbyButton;
 
 	UFUNCTION()
 	void LoginButtonOnClick();
+	UFUNCTION()
+	void CreateLobbyButtonOnClick();	
+	UFUNCTION()
+	void FindLobbyButtonOnClick();
 };

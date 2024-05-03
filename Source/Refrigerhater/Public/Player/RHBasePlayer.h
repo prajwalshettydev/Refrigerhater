@@ -9,6 +9,7 @@
 #include "RHBasePlayer.generated.h"
 
 class UWidgetComponent;
+class USWorldUserWidget;
 class UCameraComponent;
 UCLASS()
 class REFRIGERHATER_API ARHBasePlayer : public ACharacter
@@ -19,6 +20,15 @@ public:
 
 	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Health")
 	float Health;
+
+	// Max Health
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float MaxHealth;
+
+
+	// Override the TakeDamage function
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 
 	// Player resource capacity
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -63,6 +73,8 @@ public:
 	// Components for displaying the name
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UWidgetComponent* NameTagComponent;
+	
+	USWorldUserWidget* ActiveHealthBar;
 	
 	// Sets default values for this character's properties
 	ARHBasePlayer();

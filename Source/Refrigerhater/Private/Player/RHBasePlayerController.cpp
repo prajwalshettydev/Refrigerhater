@@ -4,6 +4,7 @@
 #include "..\Public\Player\RHBasePlayerController.h"
 
 #include "RHCustomLog.h"
+#include "RHGameModeBase.h"
 #include "Player/RHBasePlayer.h"
 
 void ARHBasePlayerController::OnPossess(APawn* InPawn)
@@ -29,6 +30,28 @@ ARHBasePlayerController::ARHBasePlayerController()
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+}
+
+
+// In ARHPlayerController.cpp
+void ARHBasePlayerController::ServerPlayerReady_Implementation(int32 SelectedTeam, const FString& SelectedFridge)
+{
+	ARHGameModeBase* GM = Cast<ARHGameModeBase>(GetWorld()->GetAuthGameMode());
+	if (GM)
+	{
+		GM->ServerPlayerReady(this, SelectedTeam, SelectedFridge);
+	}
+}
+
+bool ARHBasePlayerController::ServerPlayerReady_Validate(int32 SelectedTeam, const FString& SelectedFridge)
+{
+	// Add validation logic if needed
+	return true;  // Simplified for example
+}
+
+void ARHBasePlayerController::CallServerPlayerReady(int32 SelectedTeam, const FString& SelectedFridge)
+{
+	ServerPlayerReady(SelectedTeam, SelectedFridge);
 }
 
 void ARHBasePlayerController::BeginPlay()

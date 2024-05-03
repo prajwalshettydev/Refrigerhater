@@ -41,26 +41,60 @@ void ATHProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+// void ATHProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+// {
+// 	// Only deal damage if we hit a pawn
+// 	if (OtherActor && OtherActor != this && OtherComp && OtherComp->IsSimulatingPhysics())
+// 	{
+// 		if (AActor* HitActor = Hit.GetActor())
+// 		{
+// 			// Apply damage
+// 			UGameplayStatics::ApplyDamage(HitActor, DamageAmount, nullptr, this, nullptr);
+// 		}
+//
+// 		// Add your effects for the hit, like a sound or a particle effect
+//
+// 		// Draw a debug sphere at the hit location
+// 		if (GEngine)
+// 		{
+// 			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 32.0f, 12, FColor::Red, false, 5.0f);
+// 		}
+//
+// 		// Destroy the projectile
+// 		Destroy();
+// 	}
+// }
+
+// Source file (.cpp)
 void ATHProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// Only deal damage if we hit a pawn
-	if (OtherActor && OtherActor != this && OtherComp && OtherComp->IsSimulatingPhysics())
+	UE_LOG(LogTemp, Warning, TEXT("one successfull hit, %s "), *OtherActor->GetName());
+	if (GetLocalRole() == ROLE_Authority && OtherActor && OtherActor != this && OtherActor != GetInstigator())
 	{
-		if (AActor* HitActor = Hit.GetActor())
+		UE_LOG(LogTemp, Warning, TEXT("two successfull hit, %s "), *OtherActor->GetName());
+		APawn* HitPawn = Cast<APawn>(OtherActor);
+		if (HitPawn)
 		{
-			// Apply damage
-			UGameplayStatics::ApplyDamage(HitActor, DamageAmount, nullptr, this, nullptr);
+			ServerDealDamage(HitPawn, Damage);
 		}
 
-		// Add your effects for the hit, like a sound or a particle effect
+		// Assume SpawnImpactEffects is another method you've implemented to handle visual/sound effects
+		//SpawnImpactEffects(Hit.ImpactPoint);
 
-		// Draw a debug sphere at the hit location
-		if (GEngine)
-		{
-			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 32.0f, 12, FColor::Red, false, 5.0f);
-		}
-
-		// Destroy the projectile
-		Destroy();
+		SetLifeSpan(1);
 	}
+}
+
+void ATHProjectile::ServerDealDamage_Implementation(APawn* HitPawn, float DamageAmount)
+{
+	if (HitPawn)
+	{
+		UGameplayStatics::ApplyDamage(HitPawn, DamageAmount, GetInstigatorController(), this, UDamageType::StaticClass());
+	}
+}
+
+bool ATHProjectile::ServerDealDamage_Validate(APawn* HitPawn, float DamageAmount)
+{
+	// Add validation logic here, if necessary
+	return true;
 }

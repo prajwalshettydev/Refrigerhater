@@ -98,6 +98,11 @@ ARHBasePlayer::ARHBasePlayer()
 	NameTagComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	NameTagComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f)); // Adjust as necessary
 	NameTagComponent->SetDrawSize(FVector2D(200.0f, 50.0f)); // Adjust as necessary
+
+	if (HasAuthority())
+	{
+		Health = MaxHealth;
+	}
 }
 
 void ARHBasePlayer::BeginPlay()
@@ -249,6 +254,39 @@ void ARHBasePlayer::OnRep_Health()
 }
 
 
+/**
+ * Apply damage to this actor.,
+ * Unreal's defualt function, currently overriden. 
+ * @param DamageAmount 
+ * @param DamageEvent 
+ * @param EventInstigator 
+ * @param DamageCauser 
+ * @return 
+ */
+float ARHBasePlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+
+	UE_LOG(LogTemp, Warning, TEXT("I am tking damage omg, %s "), *PlayerName);
+	
+	// Call the base class version
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// Subtract the damage amount from the health
+	Health -= ActualDamage;
+
+	// Clamp the health to 0 to ensure it doesn't go negative
+	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
+
+	// If health has reached zero, handle the death of the character
+	if (Health <= 0)
+	{
+		// Handle death here (e.g., playing an animation, removing the character from the game, etc.)
+	}
+
+	// Return the actual damage dealt
+	return ActualDamage;
+}
+
 
 void ARHBasePlayer::FireWeapon(const FVector& Direction)
 {
@@ -353,31 +391,33 @@ void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	/* new input system */
-	// Get the player controller
-	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (GetWorld()->IsNetMode(NM_Client))
+	{
+		/* new input system */
+		// Get the player controller
+		APlayerController* PC = Cast<APlayerController>(GetController());
 	
-	// // Get the local player subsystem
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
-	// Clear out existing mapping, and add our mapping
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(InputMapping, 0);
+		// // Get the local player subsystem
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		// Clear out existing mapping, and add our mapping
+		Subsystem->ClearAllMappings();
+		Subsystem->AddMappingContext(InputMapping, 0);
 	
-	// Get the EnhancedInputComponent
-	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+		// Get the EnhancedInputComponent
+		UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	
-	//To keep in mind that the check macro should be used for conditions that should never fail during runtime. It is a debugging aid, and in shipping builds, the check is removed. Make sure to fix any issues that cause the check to fail before releasing your game.
-	check(PEI && "PlayerInputComponent is not initialized");
-	check(InputActions && "PlayerInputActions is not initialized");
+		//To keep in mind that the check macro should be used for conditions that should never fail during runtime. It is a debugging aid, and in shipping builds, the check is removed. Make sure to fix any issues that cause the check to fail before releasing your game.
+		check(PEI && "PlayerInputComponent is not initialized");
+		check(InputActions && "PlayerInputActions is not initialized");
 	
-	// Bind the actions
-	PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ARHBasePlayer::Move);
-	PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ARHBasePlayer::Look);
-	PEI->BindAction(InputActions->InputTap, ETriggerEvent::Triggered, this, &ARHBasePlayer::Tap);
-	PEI->BindAction(InputActions->InputGenerate, ETriggerEvent::Started, this, &ARHBasePlayer::Generate);
-	PEI->BindAction(InputActions->InputMoveUpDown, ETriggerEvent::Triggered, this, &ARHBasePlayer::MoveUpDown);
-	PEI->BindAction(InputActions->InputMoveSpeed, ETriggerEvent::Triggered, this, &ARHBasePlayer::ChangeMoveSpeed);
-	
+		// Bind the actions
+		PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ARHBasePlayer::Move);
+		PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ARHBasePlayer::Look);
+		PEI->BindAction(InputActions->InputTap, ETriggerEvent::Triggered, this, &ARHBasePlayer::Tap);
+		PEI->BindAction(InputActions->InputGenerate, ETriggerEvent::Started, this, &ARHBasePlayer::Generate);
+		PEI->BindAction(InputActions->InputMoveUpDown, ETriggerEvent::Triggered, this, &ARHBasePlayer::MoveUpDown);
+		PEI->BindAction(InputActions->InputMoveSpeed, ETriggerEvent::Triggered, this, &ARHBasePlayer::ChangeMoveSpeed);
+	}
 }
 
 #pragma endregion

@@ -21,13 +21,13 @@ class REFRIGERHATER_API ARHGameModeBase : public AGameModeBase
 private:
 	// Stores player choices for teams and fridge types
 	TMap<APlayerState*, int32> PlayerTeamAssignments;
-	TMap<APlayerState*, FString> PlayerFridgeSelections;
+	TMap<APlayerState*, EFridgeType> PlayerFridgeSelections;
 
 	// Checks if all players are ready and valid
 	bool AreAllPlayersReady();
 
 	// Validates team and fridge type selections
-	bool IsTeamAndFridgeValid(int32 PlayerTeam, const FString& FridgeType) const;
+	bool IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType) const;
 	//UMyWidget
 
 protected:
@@ -63,7 +63,7 @@ public:
 
 	// RPC function to receive player readiness and selection data
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPlayerReady(APlayerController* PlayerController, int32 PlayerTeam, const FString& FridgeType);
+	void ServerPlayerReady(APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType);
 
 	virtual bool ShouldSpawnAtStartSpot(AController* Player) override;
 	virtual void RestartPlayerAtPlayerStart(AController* Controller, AActor* StartSpot) override;

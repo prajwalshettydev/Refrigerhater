@@ -25,6 +25,7 @@ void ARHBasePlayerController::OnPossess(APawn* InPawn)
 	
 }
 
+
 ARHBasePlayerController::ARHBasePlayerController()
 {
 	bShowMouseCursor = true;
@@ -34,24 +35,24 @@ ARHBasePlayerController::ARHBasePlayerController()
 
 
 // In ARHPlayerController.cpp
-void ARHBasePlayerController::ServerPlayerReady_Implementation(int32 SelectedTeam, const FString& SelectedFridge)
+void ARHBasePlayerController::ServerPlayerReady_Implementation(int32 SelectedTeam, const EFridgeType FridgeType)
 {
 	ARHGameModeBase* GM = Cast<ARHGameModeBase>(GetWorld()->GetAuthGameMode());
 	if (GM)
 	{
-		GM->ServerPlayerReady(this, SelectedTeam, SelectedFridge);
+		GM->ServerPlayerReady(this, SelectedTeam, FridgeType);
 	}
 }
 
-bool ARHBasePlayerController::ServerPlayerReady_Validate(int32 SelectedTeam, const FString& SelectedFridge)
+bool ARHBasePlayerController::ServerPlayerReady_Validate(int32 SelectedTeam, const EFridgeType FridgeType)
 {
 	// Add validation logic if needed
 	return true;  // Simplified for example
 }
 
-void ARHBasePlayerController::CallServerPlayerReady(int32 SelectedTeam, const FString& SelectedFridge)
+void ARHBasePlayerController::CallServerPlayerReady(int32 SelectedTeam, const EFridgeType FridgeType)
 {
-	ServerPlayerReady(SelectedTeam, SelectedFridge);
+	ServerPlayerReady(SelectedTeam, FridgeType);
 }
 
 void ARHBasePlayerController::BeginPlay()

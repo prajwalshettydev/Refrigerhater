@@ -99,8 +99,9 @@ void ARHGameModeBase::StartGame()
 		}
 	}
 }
-void ARHGameModeBase::ServerPlayerReady_Implementation(APlayerController* PlayerController, int32 PlayerTeam, const FString& FridgeType)
+void ARHGameModeBase::ServerPlayerReady_Implementation(APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType)
 {
+	UE_LOG(LogPlayer, Log, TEXT("Player ready %s"), *PlayerController->GetName());
 	if (!IsTeamAndFridgeValid(PlayerTeam, FridgeType))
 	{
 		// Optionally send a message back to the player about invalid selection
@@ -116,7 +117,7 @@ void ARHGameModeBase::ServerPlayerReady_Implementation(APlayerController* Player
 	}
 }
 
-bool ARHGameModeBase::ServerPlayerReady_Validate(APlayerController* PlayerController, int32 PlayerTeam, const FString& FridgeType)
+bool ARHGameModeBase::ServerPlayerReady_Validate(APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType)
 {
 	// Add validation logic here if necessary
 	return true;
@@ -127,11 +128,13 @@ bool ARHGameModeBase::AreAllPlayersReady()
 	// Implement logic to check if all players are ready
 	// This might include checking the number of players and their readiness state
 	int32 NumConnectedPlayers = GetNumPlayers(); // Get the total number of players connected
+	
+	UE_LOG(LogPlayer, Log, TEXT("total players connected %d"), NumConnectedPlayers);
 	return PlayerTeamAssignments.Num() == NumConnectedPlayers && PlayerFridgeSelections.Num() == NumConnectedPlayers;
 
 }
 
-bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const FString& FridgeType) const
+bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType) const
 {
 	// Implement checks for team limits and fridge type validity
 	return true; // Simplified for example
@@ -201,7 +204,7 @@ UClass* ARHGameModeBase::GetPlayerClassForFridgeType(EFridgeType FridgeType)
 			return DoubleDoorFridgePlayerClass;
 		case EFridgeType::MiniFridge:
 			return MiniFridgePlayerClass;
-		//default:
-			// return ADefaultPlayer::StaticClass();  // Fallback player class
+		default:
+			return ARHBasePlayer::StaticClass();  // Fallback player class
 	}
 }

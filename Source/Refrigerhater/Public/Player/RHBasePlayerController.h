@@ -19,11 +19,11 @@ class REFRIGERHATER_API ARHBasePlayerController : public APlayerController
 public:
 	
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPlayerReady(int32 SelectedTeam, const FString& SelectedFridge);
+	void ServerPlayerReady(int32 SelectedTeam, const EFridgeType FridgeType);
 
 	// In ARHPlayerController.h
 	UFUNCTION(BlueprintCallable)
-	void CallServerPlayerReady(int32 SelectedTeam, const FString& SelectedFridge);
+	void CallServerPlayerReady(int32 SelectedTeam, const EFridgeType FridgeType);
 	
 	ARHBasePlayerController();
 	

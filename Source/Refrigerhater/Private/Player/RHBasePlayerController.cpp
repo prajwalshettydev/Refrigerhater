@@ -40,7 +40,7 @@ void ARHBasePlayerController::ServerPlayerReady_Implementation(int32 SelectedTea
 	ARHGameModeBase* GM = Cast<ARHGameModeBase>(GetWorld()->GetAuthGameMode());
 	if (GM)
 	{
-		GM->ServerPlayerReady(this, SelectedTeam, FridgeType);
+		GM->OnSpecificPlayerIsReady(this, SelectedTeam, FridgeType);
 	}
 }
 

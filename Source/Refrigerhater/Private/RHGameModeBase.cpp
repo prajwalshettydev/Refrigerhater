@@ -14,6 +14,7 @@
 
 ARHGameModeBase::ARHGameModeBase()
 {
+	//Setup all the default classes for the game mode
 	PlayerControllerClass = ARHBasePlayerController::StaticClass();
 	DefaultPawnClass = ARHBasePlayer::StaticClass();
 	PlayerStateClass = ARHBasePlayerState::StaticClass();
@@ -22,20 +23,12 @@ ARHGameModeBase::ARHGameModeBase()
 	bStartPlayersAsSpectators = true;
 	
 	CacheTeamSpawnPoints();
-	
-	// // Blueprinted Version, relies on the asset path obtained from the editor
-	// static ConstructorHelpers::FClassFinder<ARHBasePlayer> PlayerPawnClassFinder(TEXT("/Game/Player/BP_SingleDoorFridge.BP_SingleDoorFridge"));
-	// if (PlayerPawnClassFinder.Succeeded())
-	// {
-	// 	DefaultPawnClass = PlayerPawnClassFinder.Class;
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogPlayer, Error, TEXT("Failed to find the player pawn bp class"));
-	// }
 }
 
 
+/**
+ * Cache team spawn points just once during construction
+ */
 void ARHGameModeBase::CacheTeamSpawnPoints()
 {
 	TArray<AActor*> SpawnPoints;
@@ -59,55 +52,54 @@ void ARHGameModeBase::CacheTeamSpawnPoints()
 	//UE_LOG(LogTemp, Log, TEXT("Team 1 Spawn Points: %d, Team 2 Spawn Points: %d"), Team1SpawnPoints.Num(), Team2SpawnPoints.Num());
 }
 
-void ARHGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
-{
-	Super::InitGame(MapName, Options, ErrorMessage);
-}
 
-void ARHGameModeBase::StartPlay()
-{
-	Super::StartPlay();
-}
-
+/**
+ * This is called every time a new player joins the game, it's also called 'Event OnPostLogin' in blueprints
+ * @param NewPlayer 
+ */
 void ARHGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	// Cast the NewPlayer's controlled pawn to your player class, if that's where your data is stored
-	ARHBasePlayer* NewPlayerPawn = Cast<ARHBasePlayer>(NewPlayer->GetPawn());
-
 	// Make sure the cast was successful and the pawn is valid
-	if (NewPlayerPawn)
+	if (const ARHBasePlayer* NewPlayerPawn = Cast<ARHBasePlayer>(NewPlayer->GetPawn()))
 	{
 		UE_LOG(LogPlayer, Log, TEXT("Player Connected %s"), *NewPlayerPawn->PlayerName);
+		
 		// Now call the function on the pawn that updates all clients with the initial state
 		//NewPlayerPawn->UpdateAllClientsWithInitialState();
 	}
-	else
-	{
-		UE_LOG(LogPlayer, Error, TEXT("Failed to find the player pawn"));
-	}
 }
 
-void ARHGameModeBase::StartGame()
+/**
+ * Our custom game start function not to be confused with unreal's own overridable start game related functions in game mode base
+ */
+void ARHGameModeBase::StartGameCustom()
 {
-	UE_LOG(LogPlayer, Error, TEXT("Starting game"));
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		AController* PlayerController = It->Get();
-		if (PlayerController && !PlayerController->GetPawn()) // Check if the player has no pawn yet
+		if (PlayerController && !PlayerController->GetPawn()) 
 		{
-			SpawnPlayerAtTeamStart(PlayerController); // Custom function to handle spawning logic based on teams or any other criteria
+			// we are manually spawning the players here based on the teams they have selected
+			SpawnPlayerAtTeamStart(PlayerController); 
 		}
 	}
-
-	// All players are ready
+	
 	if (ARHGameStateBase* MyGameState = GetGameState<ARHGameStateBase>())
 	{
 		MyGameState->bArePlayersReady = true; // This will trigger OnRep_PlayersReady on all clients
 	}
 }
-void ARHGameModeBase::ServerPlayerReady_Implementation(APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType)
+
+
+/**
+ * A particlar player has informed the game mode base in the server that it is ready to play!
+ * @param PlayerController 
+ * @param PlayerTeam 
+ * @param FridgeType 
+ */
+void ARHGameModeBase::OnSpecificPlayerIsReady(const APlayerController* PlayerController, const int32 PlayerTeam, const EFridgeType FridgeType)
 {
 	UE_LOG(LogPlayer, Log, TEXT("Player ready %s"), *PlayerController->GetName());
 	if (!IsTeamAndFridgeValid(PlayerTeam, FridgeType))
@@ -121,15 +113,11 @@ void ARHGameModeBase::ServerPlayerReady_Implementation(APlayerController* Player
 
 	if (AreAllPlayersReady())
 	{
-		StartGame();
+		StartGameCustom();
 	}
 }
 
-bool ARHGameModeBase::ServerPlayerReady_Validate(APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType)
-{
-	// Add validation logic here if necessary
-	return true;
-}
+#pragma region helpers 
 
 bool ARHGameModeBase::AreAllPlayersReady()
 {
@@ -145,11 +133,12 @@ bool ARHGameModeBase::AreAllPlayersReady()
 
 }
 
-bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType) const
+bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType)
 {
 	// Implement checks for team limits and fridge type validity
 	return true; // Simplified for example
 }
+
 void ARHGameModeBase::SpawnPlayerAtTeamStart(AController* Controller)
 {
 	if (AActor* StartSpot = ChoosePlayerStart(Controller))
@@ -158,6 +147,13 @@ void ARHGameModeBase::SpawnPlayerAtTeamStart(AController* Controller)
 	}
 }
 
+	
+/**
+ * Since ChoosePlayerStart is defined with UFUNCTION(BlueprintNativeEvent, Category=Game),
+ * this means we need to use the _Implementation suffix in your override implementation.
+ * @param Player 
+ * @return 
+ */
 AActor* ARHGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
 	ARHBasePlayerState* PlayerState = Player->GetPlayerState<ARHBasePlayerState>();
@@ -219,3 +215,5 @@ UClass* ARHGameModeBase::GetPlayerClassForFridgeType(EFridgeType FridgeType)
 			return ARHBasePlayer::StaticClass();  // Fallback player class
 	}
 }
+
+#pragma endregion

@@ -4,6 +4,7 @@
 #include "RHGameModeBase.h"
 
 #include "RHCustomLog.h"
+#include "Game/RHGameStateBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/RHBasePlayer.h"
@@ -16,6 +17,7 @@ ARHGameModeBase::ARHGameModeBase()
 	PlayerControllerClass = ARHBasePlayerController::StaticClass();
 	DefaultPawnClass = ARHBasePlayer::StaticClass();
 	PlayerStateClass = ARHBasePlayerState::StaticClass();
+	GameStateClass = ARHGameStateBase::StaticClass();
 
 	bStartPlayersAsSpectators = true;
 	
@@ -98,6 +100,12 @@ void ARHGameModeBase::StartGame()
 			SpawnPlayerAtTeamStart(PlayerController); // Custom function to handle spawning logic based on teams or any other criteria
 		}
 	}
+
+	// All players are ready
+	if (ARHGameStateBase* MyGameState = GetGameState<ARHGameStateBase>())
+	{
+		MyGameState->bArePlayersReady = true; // This will trigger OnRep_PlayersReady on all clients
+	}
 }
 void ARHGameModeBase::ServerPlayerReady_Implementation(APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType)
 {
@@ -125,6 +133,9 @@ bool ARHGameModeBase::ServerPlayerReady_Validate(APlayerController* PlayerContro
 
 bool ARHGameModeBase::AreAllPlayersReady()
 {
+	return true;
+
+	
 	// Implement logic to check if all players are ready
 	// This might include checking the number of players and their readiness state
 	int32 NumConnectedPlayers = GetNumPlayers(); // Get the total number of players connected

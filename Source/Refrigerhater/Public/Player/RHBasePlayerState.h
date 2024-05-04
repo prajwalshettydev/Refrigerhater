@@ -27,4 +27,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Team")
 	int32 Team = 1;
 	EFridgeType SelectedFridgeType;
+
+	float Health;
 };

@@ -11,4 +11,10 @@ void ARHGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARHGameStateBase, PlayerReadiness);
+	DOREPLIFETIME(ARHGameStateBase, bArePlayersReady);
+}
+
+void ARHGameStateBase::OnRep_PlayersReady() const
+{
+	OnAllPlayersReady.Broadcast();
 }

@@ -107,6 +107,11 @@ void ARHGameModeBase::OnSpecificPlayerIsReady(const APlayerController* PlayerCon
 		// Optionally send a message back to the player about invalid selection
 		return;
 	}
+	
+	ARHBasePlayerState* PlayerState = PlayerController->GetPlayerState<ARHBasePlayerState>();
+	PlayerState->Team =PlayerTeam;
+	PlayerState->SelectedFridgeType = FridgeType;
+	
 
 	PlayerTeamAssignments.Add(PlayerController->PlayerState, PlayerTeam);
 	PlayerFridgeSelections.Add(PlayerController->PlayerState, FridgeType);
@@ -159,7 +164,7 @@ AActor* ARHGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 	ARHBasePlayerState* PlayerState = Player->GetPlayerState<ARHBasePlayerState>();
 	if (PlayerState)
 	{
-		TArray<AActor*>* TeamSpawnPoints = (PlayerState->Team == 1) ? &Team1SpawnPoints : &Team2SpawnPoints;
+		TArray<AActor*>* TeamSpawnPoints = (PlayerState->Team == 0) ? &Team1SpawnPoints : &Team2SpawnPoints;
 
 		if (TeamSpawnPoints->Num() > 0)
 		{
@@ -201,7 +206,7 @@ void ARHGameModeBase::RestartPlayerAtPlayerStart(AController* Controller, AActor
 	Super::RestartPlayerAtPlayerStart(Controller, StartSpot);
 }
 
-UClass* ARHGameModeBase::GetPlayerClassForFridgeType(EFridgeType FridgeType)
+UClass* ARHGameModeBase::GetPlayerClassForFridgeType(EFridgeType FridgeType) const
 {
 	switch (FridgeType)
 	{

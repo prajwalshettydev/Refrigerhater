@@ -24,6 +24,9 @@ public:
 	// In ARHPlayerController.h
 	UFUNCTION(BlueprintCallable)
 	void CallServerPlayerReady(int32 SelectedTeam, const EFridgeType FridgeType);
+
+	UFUNCTION(BlueprintCallable)
+	void PrepareAndCallServerPlayerReady(const FString& TeamName, const FString& FridgeTypeName);
 	
 	ARHBasePlayerController();
 	

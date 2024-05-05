@@ -43,7 +43,7 @@ private:
 	static bool IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType);
 	void CacheTeamSpawnPoints();
 	void SpawnPlayerAtTeamStart(AController* Controller);
-	UClass* GetPlayerClassForFridgeType(EFridgeType FridgeType);
+	UClass* GetPlayerClassForFridgeType(EFridgeType FridgeType) const;
 
 protected:
 	//Overrides

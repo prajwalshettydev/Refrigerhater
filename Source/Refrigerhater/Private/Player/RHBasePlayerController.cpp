@@ -55,6 +55,26 @@ void ARHBasePlayerController::CallServerPlayerReady(int32 SelectedTeam, const EF
 	ServerPlayerReady(SelectedTeam, FridgeType);
 }
 
+void ARHBasePlayerController::PrepareAndCallServerPlayerReady(const FString& TeamName, const FString& FridgeTypeName)
+{
+	// Convert TeamName to team index
+	const int32 TeamIndex = (TeamName == "Team A") ? 0 : 1; // Assuming only two teams: Team A and Team B
+
+	// Convert FridgeTypeName to EFridgeType
+	EFridgeType FridgeType = EFridgeType::SingleDoor; // Default to SingleDoor
+	if (FridgeTypeName == "Double Door")
+	{
+		FridgeType = EFridgeType::DoubleDoor;
+	}
+	else if (FridgeTypeName == "Mini Fridge")
+	{
+		FridgeType = EFridgeType::MiniFridge;
+	}
+
+	// Call the existing function with converted values
+	CallServerPlayerReady(TeamIndex, FridgeType);
+}
+
 void ARHBasePlayerController::BeginPlay()
 {
 	Super::BeginPlay();

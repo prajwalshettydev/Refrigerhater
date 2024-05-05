@@ -61,6 +61,8 @@ ARHBasePlayer::ARHBasePlayer()
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn")); // Make sure this is correct
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	RootComponent = GetCapsuleComponent();
 
 	// Assuming the parent class has already created a Skeletal Mesh Component named "CharacterMesh0"
@@ -79,7 +81,7 @@ ARHBasePlayer::ARHBasePlayer()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetUsingAbsoluteRotation(true); // Don't want arm to rotate when character does
-	CameraBoom->TargetArmLength = 800.f;
+	CameraBoom->TargetArmLength = 1250.f;
 	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
@@ -320,11 +322,11 @@ void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 	ControlRot.Pitch = 0.0f;
 	ControlRot.Roll = 0.0f;
 	
-	AddMovementInput(ControlRot.Vector(), -MoveValue.Y);
+	AddMovementInput(ControlRot.Vector(), MoveValue.Y);
 	
 	// x = forward (Red), y is right (Green), z is up (Blue)
 	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
-	AddMovementInput(RightVector, -MoveValue.X);
+	AddMovementInput(RightVector, MoveValue.X);
 	//}
 }
 
@@ -462,5 +464,35 @@ void ARHBasePlayer::OnRep_PlayerColor()
 			// Update the color on the dynamic material instance
 			DynamicMaterialInstance->SetVectorParameterValue(FName("BaseColor"), PlayerColor);
 		}
+	}
+}
+
+bool ARHBasePlayer::AddResource(const FString& ResourceType, int32 Amount)
+{
+	if (ResourceInventory.Contains(ResourceType))
+	{
+		if (ResourceInventory[ResourceType] + Amount <= MaxInventorySize)
+		{
+			ResourceInventory[ResourceType] += Amount;
+			return true;
+		}
+	}
+	else
+	{
+		if (Amount <= MaxInventorySize)
+		{
+			ResourceInventory.Add(ResourceType, Amount);
+			return true;
+		}
+	}
+	return false; // Inventory full or addition exceeds max size
+}
+
+void ARHBasePlayer::HandleResourcePickup(const FString& ResourceType, int32 Amount)
+{
+	if (!AddResource(ResourceType, Amount))
+	{
+		// Handle what happens if resource can't be added because inventory is full
+		// For example, display a message or ignore the pickup
 	}
 }

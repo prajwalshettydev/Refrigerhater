@@ -88,13 +88,14 @@ void ARHGameModeBase::StartGameCustom()
 	
 	if (ARHGameStateBase* MyGameState = GetGameState<ARHGameStateBase>())
 	{
+		UE_LOG(LogPlayer, Log, TEXT("Everyones ready lets go"));
 		MyGameState->bArePlayersReady = true; // This will trigger OnRep_PlayersReady on all clients
 	}
 }
 
 
 /**
- * A particlar player has informed the game mode base in the server that it is ready to play!
+ * A particular player has informed the game mode base in the server that it is ready to play!
  * @param PlayerController 
  * @param PlayerTeam 
  * @param FridgeType 
@@ -109,8 +110,9 @@ void ARHGameModeBase::OnSpecificPlayerIsReady(const APlayerController* PlayerCon
 	}
 	
 	ARHBasePlayerState* PlayerState = PlayerController->GetPlayerState<ARHBasePlayerState>();
-	PlayerState->Team =PlayerTeam;
+	PlayerState->Team = PlayerTeam;
 	PlayerState->SelectedFridgeType = FridgeType;
+	PlayerState->Ready = true;
 	
 
 	PlayerTeamAssignments.Add(PlayerController->PlayerState, PlayerTeam);

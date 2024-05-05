@@ -29,6 +29,14 @@ public:
 	// Override the TakeDamage function
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	// Resource inventory map
+	UPROPERTY(VisibleAnywhere, Category="Inventory")
+	TMap<FString, int32> ResourceInventory;
+
+	// Max inventory size
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
+	int32 MaxInventorySize = 10;
+
 
 	// Player resource capacity
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -82,6 +90,10 @@ public:
 private:
 	UFUNCTION(BlueprintCallable)
 	void InitializeNameTag();
+
+	
+	// Helper functions
+	bool AddResource(const FString& ResourceType, int32 Amount);
 	
 	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -122,6 +134,9 @@ public:
 	// Function to gather resources
 	UFUNCTION(BlueprintCallable)
 	void GatherResources();
+
+	// Handle resource pickup
+	void HandleResourcePickup(const FString& ResourceType, int32 Amount);
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

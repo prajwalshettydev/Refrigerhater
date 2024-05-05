@@ -55,6 +55,14 @@ void ARHBasePlayerController::CallServerPlayerReady(int32 SelectedTeam, const EF
 	ServerPlayerReady(SelectedTeam, FridgeType);
 }
 
+
+/**
+ * Takes string inputs for team name and fridge types,
+ * can be use alternative to CallServerPlayerReady, which uses int and enums
+ * NOTE: for invalid string inputs, Team B and Single Door are picked as defualts
+ * @param TeamName 
+ * @param FridgeTypeName 
+ */
 void ARHBasePlayerController::PrepareAndCallServerPlayerReady(const FString& TeamName, const FString& FridgeTypeName)
 {
 	// Convert TeamName to team index

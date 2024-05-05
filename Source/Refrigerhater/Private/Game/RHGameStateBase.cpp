@@ -42,17 +42,30 @@ void ARHGameStateBase::Tick(float DeltaSeconds)
     
 	if (HasAuthority())
 	{
-		if(!bArePlayersReady)
+		// Check if the game has started
+		if (bArePlayersReady)
 		{
-			GameTimeSeconds = 0;
-		}
-		else {
-			TimeSinceLastReplication += DeltaSeconds;
-			if (TimeSinceLastReplication >= ReplicationInterval)
+			if (GameTimeSeconds > 0)  // Make sure the time doesn't go below zero
 			{
-				GameTimeSeconds += TimeSinceLastReplication;
-				TimeSinceLastReplication = 0.0f; // Reset the timer after updating
+				TimeSinceLastReplication += DeltaSeconds;
+				if (TimeSinceLastReplication >= ReplicationInterval)
+				{
+					// Reduce the GameTimeSeconds by the time passed since last update
+					GameTimeSeconds -= TimeSinceLastReplication;
+					TimeSinceLastReplication = 0.0f;
+
+					// Ensure the game time does not drop below zero
+					if (GameTimeSeconds < 0)
+					{
+						GameTimeSeconds = 0;
+					}
+				}
 			}
+		}
+		else
+		{
+			// Reset the timer if the players are not ready
+			GameTimeSeconds = 240.0f; // Set to total round time (4 minutes)
 		}
 	}
 }

@@ -29,10 +29,10 @@ protected:
 	class UBoxComponent* SpawnVolume;
 
 	UPROPERTY(EditAnywhere, Category = "Resources")
-	int32 MaxResource1Count = 10;
+	int32 MaxResource1Count = 20;
 
 	UPROPERTY(EditAnywhere, Category = "Resources")
-	int32 MaxResource2Count = 5;
+	int32 MaxResource2Count = 7;
 	
 	// // Number of resources to spawn
 	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")

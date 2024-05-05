@@ -33,19 +33,30 @@ void ARHGlobalResourceManager::BeginPlay()
 
 void ARHGlobalResourceManager::SpawnResource1()
 {
-	if (SpawnedResources1.Num() < MaxResource1Count)
+	int32 ResourcesToSpawn = 6;  // Number of resources to spawn each time function is called
+
+	// Only spawn if it does not exceed the maximum count
+	if (SpawnedResources1.Num() + ResourcesToSpawn <= MaxResource1Count)
 	{
-		FVector SpawnLocation = GenerateRandomPointInBox();
-		SpawnResourceAtLocation(ResourceClassOrdinary, SpawnLocation);
+		for (int32 i = 0; i < ResourcesToSpawn; i++)
+		{
+			FVector SpawnLocation = GenerateRandomPointInBox();
+			SpawnResourceAtLocation(ResourceClassOrdinary, SpawnLocation);
+		}
 	}
 }
 
 void ARHGlobalResourceManager::SpawnResource2()
 {
-	if (SpawnedResources2.Num() < MaxResource2Count)
+	int32 ResourcesToSpawn = 3;  // Number of resources to spawn each time function is called
+
+	if (SpawnedResources2.Num() + ResourcesToSpawn < MaxResource2Count)
 	{
-		FVector SpawnLocation = GenerateRandomPointInBox();
-		SpawnResourceAtLocation(ResourceClassEpic, SpawnLocation);
+		for (int32 i = 0; i < ResourcesToSpawn; i++)
+		{
+			FVector SpawnLocation = GenerateRandomPointInBox();
+			SpawnResourceAtLocation(ResourceClassEpic, SpawnLocation);
+		}
 	}
 }
 

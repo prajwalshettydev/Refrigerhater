@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OnlineSessionSettings.h"
 #include "Blueprint/UserWidget.h"
 #include "RHMainMenu.generated.h"
 
@@ -20,13 +21,31 @@ private:
 	class UButton* loginButton;	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* createLobbyButton;	
+	UPROPERTY(meta = (BindWidget))	
+	class UButton* joinLobbyButton;	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* findLobbyButton;
+	UPROPERTY(meta = (BindWidget))
+	class UEditableText* lobbyNameTextBox;	
+	UPROPERTY(meta = (BindWidget))
+	class UScrollBox* lobbyNameList;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class URHLobbyEntry> lobbyEntryClass;
 
 	UFUNCTION()
 	void LoginButtonOnClick();
 	UFUNCTION()
 	void CreateLobbyButtonOnClick();	
 	UFUNCTION()
-	void FindLobbyButtonOnClick();
+	void FindLobbyButtonOnClick();	
+	UFUNCTION()
+	void JoinLobbyButtonOnClick();
+	UFUNCTION()
+	void LobbyNameChanged(const FText& name);
+	UFUNCTION()
+	void LobbySelected(int index);
+
+	void SessionSearchCompleted(const TArray<FOnlineSessionSearchResult>& lobbySearchResults);
+
+	int selectedLobbyIndex = -1;
 };

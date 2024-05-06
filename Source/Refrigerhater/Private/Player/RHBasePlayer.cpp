@@ -61,6 +61,7 @@ ARHBasePlayer::ARHBasePlayer()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn")); // Make sure this is correct
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	GetCapsuleComponent()->SetNotifyRigidBodyCollision(true);
 	RootComponent = GetCapsuleComponent();
 
 	// Assuming the parent class has already created a Skeletal Mesh Component named "CharacterMesh0"

@@ -61,6 +61,10 @@ protected:
 	
 public:
 	ARHGameModeBase();
+	
+	// virtual APlayerController* Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options,
+	//                          const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
+	//int32 GetNumPlayers();
 
 	UFUNCTION(BlueprintCallable)
 	void StartGameCustom();

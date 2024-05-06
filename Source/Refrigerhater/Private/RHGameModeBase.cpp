@@ -26,6 +26,32 @@ ARHGameModeBase::ARHGameModeBase()
 	CacheTeamSpawnPoints();
 }
 
+// APlayerController* ARHGameModeBase::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+// {
+// 	// Check if we are on a dedicated server and trying to spawn a player for it
+// 	if (IsRunningDedicatedServer() && InRemoteRole < ROLE_AutonomousProxy)
+// 	{
+// 		// Prevent player creation for the server
+// 		return nullptr;
+// 	}
+//
+// 	// Call the base method to continue with normal player spawning
+// 	return Super::Login(NewPlayer, InRemoteRole, Portal, Options, UniqueId, ErrorMessage);
+// }
+
+// int32 ARHGameModeBase::GetNumPlayers()
+// {
+// 	int32 PlayerCount = 0;
+// 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+// 	{
+// 		APlayerController* PC = It->Get();
+// 		if (PC && PC->IsLocalPlayerController()) // Ensures counting only actual players
+// 		{
+// 			PlayerCount++;
+// 		}
+// 	}
+// 	return PlayerCount;
+// }
 
 /**
  * Cache team spawn points just once during construction
@@ -151,7 +177,7 @@ bool ARHGameModeBase::AreAllPlayersReady()
 	UE_LOG(LogPlayer, Log, TEXT("Total players connected: %d, Ready Players: %d"), NumConnectedPlayers, ReadyPlayers);
 
 	// Check if the number of ready players equals the number of connected players
-	return ReadyPlayers == NumConnectedPlayers;
+	return ReadyPlayers == NumConnectedPlayers - 1; //temp
 }
 
 bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType)

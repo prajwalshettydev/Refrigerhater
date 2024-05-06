@@ -62,8 +62,8 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerFireWeapon(const FVector& Direction);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFireWeapon(const FVector& Direction);
+	// UFUNCTION(NetMulticast, Reliable)
+	// void MulticastFireWeapon(const FVector& Direction);
 
 	// Replicated properties for player name and color
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerName)

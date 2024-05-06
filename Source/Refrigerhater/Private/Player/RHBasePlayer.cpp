@@ -25,9 +25,7 @@
 
 // List of potential player names
 static const TArray<FString> PossiblePlayerNames = {
-	TEXT("Maverick"),
-	TEXT("Prajwal"),
-	TEXT("Asheen"),
+	TEXT("Maverick"), TEXT("Prajwal"), TEXT("Asheen"),
 	TEXT("Phoenix"),
 	TEXT("Vortex"),
 	TEXT("Blaze"),
@@ -149,6 +147,7 @@ void ARHBasePlayer::Tick(float DeltaTime)
 }
 #pragma endregion
 
+#pragma region projectile
 
 /**
  * Called on the client, but executed on the server.
@@ -157,30 +156,13 @@ void ARHBasePlayer::Tick(float DeltaTime)
  */
 void ARHBasePlayer::ServerFireWeapon_Implementation(const FVector& Direction)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server firingggggg"));
-	//MulticastFireWeapon(Direction);
 	ProjectileSpawn(Direction);
 }
 
 bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
 {
-	return true; // Add validation logic if needed
+	return true;
 }
-
-void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
-{
-	if (ProjectileClass != nullptr)
-	{
-		// Check if this is the owning client and skip the following logic if it is
-		if (IsLocallyControlled())
-		{
-			return;
-		}
-		
-		ProjectileSpawn(Direction);
-	}
-}
-
 
 /**
  * Spawns projectile in the server 
@@ -188,27 +170,19 @@ void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
  */
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
-	// The muzzle location is typically where you want the projectile to spawn
+	// Projectile spawn loc, can be weapon bone in the future
 	FVector MuzzleLocation = GetActorLocation(); //+ FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
-        
-	// Instead of using GetControlRotation, use the direction to create a rotation
-	// The direction vector should point outwards from the front of the projectile
 	FRotator MuzzleRotation = Direction.Rotation();
-
-	
-        
 	UWorld* World = GetWorld();
+	
 	if (World != nullptr)
 	{
 		// Spawn the projectile at the muzzle.
-		ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation);
-		if (Projectile)
+		if (ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
 			// Disable collision with the player immediately on spawn
 			Projectile->SetActorEnableCollision(false);
-    
-			// Set a timer to re-enable collision after a very short delay
-			FTimerHandle TimerHandle;
+			FTimerHandle TimerHandle; // Set a timer to re-enable collision after a very short delay
 			World->GetTimerManager().SetTimer(TimerHandle, [Projectile]()
 			{
 				if (Projectile)
@@ -220,13 +194,6 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 			
 			// Set the projectile's direction to the fire direction
 			Projectile->SetActorRotation(MuzzleRotation);
-			UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
-			// // If the projectile has a Projectile Movement component, you may also need to directly set the velocity
-			// if (Projectile->ProjectileMovement)
-			// {
-			// 	Projectile->ProjectileMovement->Velocity = FireDirection * Projectile->ProjectileMovement->InitialSpeed;
-			// }
-
 			Projectile->SetLifeSpan(5.0f);
 			
 			// Draw a debug line for visualization
@@ -236,104 +203,16 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 	}
 }
 
-void ARHBasePlayer::ReceiveDamage(float DamageAmount)
-{
-	if (HasAuthority())
-	{
-		Health -= DamageAmount;
-		if (Health <= 0)
-		{
-			// Handle death
-		}
-
-		OnRep_Health(); // Manually call to update locally, replication handles remote updates
-	}
-}
-
-void ARHBasePlayer::OnRep_Health()
-{
-	// React to health changes, e.g., update UI
-}
-
-
-/**
- * Apply damage to this actor.,
- * Unreal's defualt function, currently overriden. 
- * @param DamageAmount 
- * @param DamageEvent 
- * @param EventInstigator 
- * @param DamageCauser 
- * @return 
- */
-float ARHBasePlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-
-	UE_LOG(LogTemp, Warning, TEXT("I am tking damage omg, %s "), *PlayerName);
-	
-	// Call the base class version
-	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	// Subtract the damage amount from the health
-	Health -= ActualDamage;
-
-	// Clamp the health to 0 to ensure it doesn't go negative
-	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
-
-	// If health has reached zero, handle the death of the character
-	if (Health <= 0)
-	{
-		// Handle death here (e.g., playing an animation, removing the character from the game, etc.)
-	}
-
-	// Return the actual damage dealt
-	return ActualDamage;
-}
-
-
 void ARHBasePlayer::FireWeapon(const FVector& Direction)
 {
-	//i.e in this context, is server? which will ALWAYS be false as the FIREWEAPON is usually called on player keyboard ip on client
-	if (HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("has autorityy"));
-		//MulticastFireWeapon(Direction);
-		ProjectileSpawn(Direction);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
-		ServerFireWeapon(Direction);
-	}
-}
 
-void ARHBasePlayer::GatherResources()
-{
-	
+	//todo: check if already too many projectiles exist or control fire rate here, and a validation in the server can be added too later.
+
+	UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
+	ServerFireWeapon(Direction);
 }
 
 
-#pragma region Input
-
-void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
-{
-
-	const FVector2D MoveValue = InputActionValue.Get<FVector2D>();
-	FRotator ControlRot = GetControlRotation();
-	ControlRot.Pitch = 0.0f;
-	ControlRot.Roll = 0.0f;
-	
-	AddMovementInput(ControlRot.Vector(), MoveValue.Y);
-	
-	// x = forward (Red), y is right (Green), z is up (Blue)
-	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
-	AddMovementInput(RightVector, MoveValue.X);
-	//}
-}
-
-void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
-{
-	
-}
 
 void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 {
@@ -374,6 +253,88 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 			FireWeapon(FireDirection);
 		}
 	}
+}
+
+#pragma endregion
+
+#pragma region damage/health
+
+void ARHBasePlayer::ReceiveDamage(float DamageAmount)
+{
+	if (HasAuthority())
+	{
+		Health -= DamageAmount;
+		if (Health <= 0)
+		{
+			// Handle death
+		}
+
+		OnRep_Health(); // Manually call to update locally, replication handles remote updates
+	}
+}
+
+
+
+/**
+ * Apply damage to this actor.,
+ * Unreal's defualt function, currently overriden. 
+ * @param DamageAmount 
+ * @param DamageEvent 
+ * @param EventInstigator 
+ * @param DamageCauser 
+ * @return 
+ */
+float ARHBasePlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+
+	UE_LOG(LogTemp, Warning, TEXT("I am tking damage omg, %s "), *PlayerName);
+	
+	// Call the base class version
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// Subtract the damage amount from the health
+	Health -= ActualDamage;
+
+	// Clamp the health to 0 to ensure it doesn't go negative
+	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
+
+	// If health has reached zero, handle the death of the character
+	if (Health <= 0)
+	{
+		// Handle death here (e.g., playing an animation, removing the character from the game, etc.)
+	}
+
+	// Return the actual damage dealt
+	return ActualDamage;
+}
+
+#pragma endregion
+
+void ARHBasePlayer::GatherResources()
+{
+	
+}
+
+#pragma region Input
+
+void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
+{
+	const FVector2D MoveValue = InputActionValue.Get<FVector2D>();
+	FRotator ControlRot = GetControlRotation();
+	ControlRot.Pitch = 0.0f;
+	ControlRot.Roll = 0.0f;
+	
+	AddMovementInput(ControlRot.Vector(), MoveValue.Y);
+	
+	// x = forward (Red), y is right (Green), z is up (Blue)
+	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
+	AddMovementInput(RightVector, MoveValue.X);
+	//}
+}
+
+void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
+{
+	
 }
 
 void ARHBasePlayer::Generate(const FInputActionValue& InputActionValue)
@@ -467,6 +428,11 @@ void ARHBasePlayer::OnRep_PlayerColor()
 	}
 }
 
+void ARHBasePlayer::OnRep_Health()
+{
+	// React to health changes, e.g., update UI
+}
+
 bool ARHBasePlayer::AddResource(const FString& ResourceType, int32 Amount)
 {
 	if (ResourceInventory.Contains(ResourceType))
@@ -496,3 +462,18 @@ void ARHBasePlayer::HandleResourcePickup(const FString& ResourceType, int32 Amou
 		// For example, display a message or ignore the pickup
 	}
 }
+
+
+// void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
+// {
+// 	if (ProjectileClass != nullptr)
+// 	{
+// 		// Check if this is the owning client and skip the following logic if it is
+// 		if (IsLocallyControlled())
+// 		{
+// 			return;
+// 		}
+// 		
+// 		ProjectileSpawn(Direction);
+// 	}
+// }

@@ -3,6 +3,7 @@
 
 #include "RHGameModeBase.h"
 
+#include "EngineUtils.h"
 #include "RHCustomLog.h"
 #include "Game/RHGameStateBase.h"
 #include "GameFramework/PlayerStart.h"
@@ -124,20 +125,33 @@ void ARHGameModeBase::OnSpecificPlayerIsReady(const APlayerController* PlayerCon
 	}
 }
 
+void ARHGameModeBase::AddPointsForTeam(const FString& ResourceType, int32 Quantity, int32 TeamID)
+{
+	// Implement logic to add points based on the resource type and quantity
+	// Example: update a team's score
+}
+
 #pragma region helpers 
 
 bool ARHGameModeBase::AreAllPlayersReady()
 {
-	return true;
+	const int32 NumConnectedPlayers = GetNumPlayers(); // Get the total number of players connected
+	int32 ReadyPlayers = 0;
 
-	
-	// Implement logic to check if all players are ready
-	// This might include checking the number of players and their readiness state
-	int32 NumConnectedPlayers = GetNumPlayers(); // Get the total number of players connected
-	
-	UE_LOG(LogPlayer, Log, TEXT("total players connected %d"), NumConnectedPlayers);
-	return PlayerTeamAssignments.Num() == NumConnectedPlayers && PlayerFridgeSelections.Num() == NumConnectedPlayers;
+	// Iterate over all player states to check if each player is ready
+	for (APlayerState* PlayerState : TActorRange<APlayerState>(GetWorld()))
+	{
+		const ARHBasePlayerState* RHPlayerState = Cast<ARHBasePlayerState>(PlayerState);
+		if (RHPlayerState && RHPlayerState->Ready)
+		{
+			ReadyPlayers++;
+		}
+	}
 
+	UE_LOG(LogPlayer, Log, TEXT("Total players connected: %d, Ready Players: %d"), NumConnectedPlayers, ReadyPlayers);
+
+	// Check if the number of ready players equals the number of connected players
+	return ReadyPlayers == NumConnectedPlayers;
 }
 
 bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType)

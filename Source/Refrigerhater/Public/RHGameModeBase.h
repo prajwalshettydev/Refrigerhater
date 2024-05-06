@@ -68,6 +68,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnSpecificPlayerIsReady(const APlayerController* PlayerController, int32 PlayerTeam, const EFridgeType FridgeType);
 
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void AddPointsForTeam(const FString& ResourceType, int32 Quantity, int32 TeamID);
 
 
 

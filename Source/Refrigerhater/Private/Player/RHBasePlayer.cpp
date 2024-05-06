@@ -20,6 +20,7 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
 #include "Input/RHInputConfigData.h"
+#include "UI/RHWorldWidget.h"
 #include "Weapon/THProjectile.h"
 
 #pragma region init
@@ -110,16 +111,6 @@ ARHBasePlayer::ARHBasePlayer()
 void ARHBasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	AController* MyController = GetController();
-	if (MyController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Controller is still null in BeginPlay"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Got controller: %s"), *MyController->GetName());
-	}
 
 	if(HasAuthority())
 	{
@@ -133,6 +124,16 @@ void ARHBasePlayer::BeginPlay()
 		// Delay the initialization of the name tag to ensure all components are ready
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 4.0f, false);
+	}
+
+		
+	if (ActiveHealthBar == nullptr) {
+		ActiveHealthBar = CreateWidget<URHWorldWidget>(GetWorld(), HealthBarWidgetClass); //param owningobject here, CANNOT be "this"
+		if (ActiveHealthBar)
+		{
+			ActiveHealthBar->AttachedActor = this;
+			ActiveHealthBar->AddToViewport(); //constructor of the UI widget will be called here. so set it's variable before that
+		}
 	}
 }
 
@@ -415,7 +416,10 @@ void ARHBasePlayer::OnRep_PlayerColor()
 
 void ARHBasePlayer::OnRep_Health()
 {
-	// React to health changes, e.g., update UI
+
+
+	
+	OnHealthChanged.Broadcast(Health);
 }
 
 bool ARHBasePlayer::AddResource(const FString& ResourceType, int32 Amount)

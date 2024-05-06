@@ -8,16 +8,29 @@
 #include "Weapon/THProjectile.h"
 #include "RHBasePlayer.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, NewHealth);
+
+class URHWorldWidget;
 class UWidgetComponent;
-class USWorldUserWidget;
 class UCameraComponent;
 UCLASS()
 class REFRIGERHATER_API ARHBasePlayer : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
+	
+	URHWorldWidget* ActiveHealthBar;
 
+protected:
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+	
+public:
+	
+	UPROPERTY(BlueprintAssignable, Category="Health")
+	FOnHealthChanged OnHealthChanged;
+	
 	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Health")
 	float Health;
 
@@ -84,8 +97,6 @@ public:
 	// Components for displaying the name
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UWidgetComponent* NameTagComponent;
-	
-	USWorldUserWidget* ActiveHealthBar;
 	
 	// Sets default values for this character's properties
 	ARHBasePlayer();

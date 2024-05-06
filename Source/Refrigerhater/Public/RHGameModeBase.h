@@ -42,7 +42,6 @@ private:
 	bool AreAllPlayersReady();
 	static bool IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType);
 	void CacheTeamSpawnPoints();
-	void SpawnPlayerAtTeamStart(AController* Controller);
 	UClass* GetPlayerClassForFridgeType(EFridgeType FridgeType) const;
 
 protected:
@@ -61,6 +60,8 @@ protected:
 	
 public:
 	ARHGameModeBase();
+	
+	void SpawnPlayerAtTeamStart(AController* Controller);
 	
 	// virtual APlayerController* Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options,
 	//                          const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;

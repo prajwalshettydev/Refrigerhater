@@ -16,6 +16,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "RHCustomLog.h"
+#include "RHGameModeBase.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
 #include "Input/RHInputConfigData.h"
@@ -260,52 +261,35 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 
 #pragma region damage/health
 
-void ARHBasePlayer::ReceiveDamage(float DamageAmount)
-{
-	if (HasAuthority())
-	{
-		Health -= DamageAmount;
-		if (Health <= 0)
-		{
-			// Handle death
-		}
-
-		OnRep_Health(); // Manually call to update locally, replication handles remote updates
-	}
-}
-
-
 
 /**
- * Apply damage to this actor.,
- * Unreal's defualt function, currently overriden. 
+ * Apply damage to this actor.
+ * Unreal's default function, currently overriden. 
  * @param DamageAmount 
  * @param DamageEvent 
  * @param EventInstigator 
  * @param DamageCauser 
  * @return 
  */
-float ARHBasePlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float ARHBasePlayer::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-
-	UE_LOG(LogTemp, Warning, TEXT("I am tking damage omg, %s "), *PlayerName);
-	
-	// Call the base class version
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	// Subtract the damage amount from the health
-	Health -= ActualDamage;
-
-	// Clamp the health to 0 to ensure it doesn't go negative
-	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
-
-	// If health has reached zero, handle the death of the character
-	if (Health <= 0)
+	if (HasAuthority())
 	{
-		// Handle death here (e.g., playing an animation, removing the character from the game, etc.)
+		UE_LOG(LogTemp, Warning, TEXT("ReceiveDamage called with DamageAmount: %f"), ActualDamage);
+		UE_LOG(LogTemp, Warning, TEXT("Player health now: %f"), Health);
+		Health -= ActualDamage;
+		if (Health <= 0)
+		{
+			// Handle death
+			HandleDeath();
+		}
+
+		OnRep_Health(); // Manually call to update locally, replication handles remote updates
 	}
 
-	// Return the actual damage dealt
+	
 	return ActualDamage;
 }
 
@@ -464,6 +448,45 @@ void ARHBasePlayer::HandleResourcePickup(const FString& ResourceType, int32 Amou
 	}
 }
 
+void ARHBasePlayer::HandleDeath()
+{
+	// Deactivate player controls and possibly hide the player model or trigger a death animation
+	GetController()->DisableInput(nullptr);
+
+	// Optionally make the player invisible or play a death animation
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+
+	// Log death
+	UE_LOG(LogTemp, Warning, TEXT("Player has died. Scheduling respawn."));
+
+	// Schedule respawn
+	FTimerHandle RespawnTimerHandle;
+	float RespawnDelay = 20.0f;  // Delay in seconds before respawning the player
+	GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, FTimerDelegate::CreateUObject(this, &ARHBasePlayer::Respawn), RespawnDelay, false);
+}
+
+void ARHBasePlayer::Respawn()
+{
+	// Ensure the controller is valid
+	AController* MyController = GetController();
+	if (MyController && MyController->IsPlayerController())
+	{
+		// Call the game mode to respawn the player
+		ARHGameModeBase* GM = Cast<ARHGameModeBase>(GetWorld()->GetAuthGameMode());
+		if (GM)
+		{
+			GM->SpawnPlayerAtTeamStart(MyController);
+		}
+	}
+
+	// Reactivate player controls
+	MyController->EnableInput(nullptr);
+
+	// Make the player visible again
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+}
 
 // void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
 // {

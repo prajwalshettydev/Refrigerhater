@@ -23,11 +23,11 @@ public:
 
 	// Max Health
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float MaxHealth;
+	float MaxHealth = 400;
 
 
-	// Override the TakeDamage function
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	// // Override the TakeDamage function
+	// virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	// Resource inventory map
 	UPROPERTY(VisibleAnywhere, Category="Inventory")
@@ -55,7 +55,10 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	void ProjectileSpawn(const FVector& Direction) const;
-	void ReceiveDamage(float DamageAmount);
+	//void ReceiveDamage(float DamageAmount);
+	UFUNCTION()
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	UFUNCTION()
 	void OnRep_Health();
 
@@ -137,7 +140,9 @@ public:
 
 	// Handle resource pickup
 	void HandleResourcePickup(const FString& ResourceType, int32 Amount);
-	
+	void HandleDeath();
+	void Respawn();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

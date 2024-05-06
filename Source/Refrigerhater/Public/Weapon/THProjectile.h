@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "THProjectile.generated.h"
 
@@ -12,39 +13,27 @@ UCLASS()
 class REFRIGERHATER_API ATHProjectile : public AActor
 {
 	GENERATED_BODY()
-
-public:
-	ATHProjectile();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	//void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, ...);
+	
+	// Damage value for the projectile
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float Damage = 50.0f;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* ProjectileMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UProjectileMovementComponent* ProjectileMovement;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USphereComponent* CollisionComponent;
+	
+protected:
+	virtual void BeginPlay() override;
 
-	// Function called when projectile hits something
+public:
+	ATHProjectile();
+	
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-	// Server function to handle damage
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerDealDamage(APawn* HitPawn, float DamageAmount);
-    
-	// Your projectile's damage amount
-	//UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	//float DamageAmount;
-
-private:
-	// Damage value for the projectile
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage = 50.0f;
+	void HitMesh(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit );
+	
 };

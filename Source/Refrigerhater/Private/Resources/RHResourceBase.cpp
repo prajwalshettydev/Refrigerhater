@@ -22,7 +22,7 @@ ARHResourceBase::ARHResourceBase()
     CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     CollisionComponent->InitSphereRadius(50.0f);
     CollisionComponent->SetCollisionProfileName(TEXT("Pickup"));
-    CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
+    //CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
     RootComponent = CollisionComponent;
 
     // Create and initialize the mesh component
@@ -45,7 +45,9 @@ ARHResourceBase::ARHResourceBase()
 void ARHResourceBase::BeginPlay()
 {
     Super::BeginPlay();
-
+    
+    CollisionComponent->OnComponentBeginOverlap.AddDynamic(this,&ARHResourceBase::OverlapBegin);
+    CollisionComponent->OnComponentEndOverlap.AddDynamic(this,&ARHResourceBase::OverlapEnd);
     MeshComponent->SetSimulatePhysics(true);
 }
 
@@ -64,8 +66,26 @@ void ARHResourceBase::OnPickedUpBy(APawn* Pawn)
 
 void ARHResourceBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("resource successfull overlap, %s "), *OtherActor->GetName());
     if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
     {
         OnPickedUpBy(Pawn);
     }
+}
+
+void ARHResourceBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
+    // if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
+    // {
+    //     OnPickedUpBy(Pawn);
+    // }
+}
+ 
+void ARHResourceBase::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+
+    UE_LOG(LogTemp, Warning, TEXT("resoussarce successfull endoverlap, %s "), *OtherActor->GetName());
 }

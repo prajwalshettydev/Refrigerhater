@@ -17,6 +17,18 @@ class REFRIGERHATER_API ARHBasePlayerController : public APlayerController
 	virtual void OnPossess(APawn* InPawn) override;
 
 public:
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerPlayerReady(int32 SelectedTeam, const EFridgeType FridgeType);
+
+	// In ARHPlayerController.h
+	UFUNCTION(BlueprintCallable)
+	void CallServerPlayerReady(int32 SelectedTeam, const EFridgeType FridgeType);
+
+	UFUNCTION(BlueprintCallable)
+	void PrepareAndCallServerPlayerReady(const FString& TeamName, const FString& FridgeTypeName);
+	
 	ARHBasePlayerController();
+	
 	void BeginPlay();
 };

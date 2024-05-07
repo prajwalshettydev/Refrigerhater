@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
-#include "Weapon/THProjectile.h"
+#include "Weapon/RHProjectile.h"
 #include "RHBasePlayer.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, NewHealth);
@@ -55,7 +55,7 @@ protected:
 	class URHInputConfigData* InputActions;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
-	TSubclassOf<ATHProjectile> ProjectileClass;
+	TSubclassOf<ARHProjectile> ProjectileClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 	FVector MuzzleOffset = FVector(100.0f, 0.0f, 0.0f);

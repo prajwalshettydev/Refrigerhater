@@ -3,6 +3,7 @@
 
 #include "Resources/RHResourceBase.h"
 
+#include "Components/ArrowComponent.h"
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Player/RHBasePlayer.h"
@@ -21,24 +22,36 @@ ARHResourceBase::ARHResourceBase()
     // Create and initialize the sphere collision component
     CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     CollisionComponent->InitSphereRadius(50.0f);
-    CollisionComponent->SetCollisionProfileName(TEXT("Pickup"));
+    CollisionComponent->SetCollisionProfileName(TEXT("ResourcePreeset"));
     //CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
     RootComponent = CollisionComponent;
 
     // Create and initialize the mesh component
     MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     MeshComponent->SetupAttachment(RootComponent);
-    // Set a default mesh, replace with your mesh asset
-    MeshComponent->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/PathToYourMesh.YourMesh'")).Object);
+    MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 
     // Create and initialize the particle system component
     ParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleSystemComponent"));
     ParticleSystemComponent->SetupAttachment(MeshComponent);
-    // Set a default particle system, replace with your particle asset
-    ParticleSystemComponent->SetTemplate(ConstructorHelpers::FObjectFinder<UParticleSystem>(TEXT("ParticleSystem'/Game/PathToYourParticle.YourParticle'")).Object);
+    // Set a default particle system, replace with your particle asset;
 
     // Ensure that the actor can be detected by raycasts and overlaps
     CollisionComponent->SetVisibility(true);
+    CollisionComponent->SetSimulatePhysics(true);
+    
+    ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
+    ArrowComponent->SetupAttachment(CollisionComponent);
+    ArrowComponent->SetRelativeLocation(FVector(0,0,120.0));
+    ArrowComponent->SetRelativeScale3D(FVector(1,1,1));
+    ArrowComponent->SetRelativeRotation(FRotator(-90, 0, 0));
+    ArrowComponent->ArrowSize = 2.5f;
+    ArrowComponent->ArrowLength = 60.0f;
+    ArrowComponent->ArrowColor = FColor::Purple;
+    BaseZ = 40.0f;
+    bGoingUp = true;
+    MovementSpeed = 45.0f; // Set a movement speed
+    MovementRange = 40.0f; // Set the range of movement
 }
 
 // Called when the game starts or when spawned
@@ -49,15 +62,30 @@ void ARHResourceBase::BeginPlay()
     CollisionComponent->OnComponentBeginOverlap.AddDynamic(this,&ARHResourceBase::OverlapBegin);
     CollisionComponent->OnComponentEndOverlap.AddDynamic(this,&ARHResourceBase::OverlapEnd);
     MeshComponent->SetSimulatePhysics(true);
+    BaseZ = ArrowComponent->GetComponentLocation().Z;
 }
 
-// Called every frame
 void ARHResourceBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    
+    FVector Location = ArrowComponent->GetComponentLocation();
+    if (bGoingUp)
+    {
+        Location.Z += MovementSpeed * DeltaTime;
+        if (Location.Z > BaseZ + MovementRange)
+            bGoingUp = false;
+    }
+    else
+    {
+        Location.Z -= MovementSpeed * DeltaTime;
+        if (Location.Z < BaseZ - MovementRange)
+            bGoingUp = true;
+    }
+    ArrowComponent->SetWorldLocation(Location);
 }
 
-// Function to handle the resource pickup
+
 void ARHResourceBase::OnPickedUpBy(APawn* Pawn)
 {
     // You could add logic here to give resources to the fridge, then destroy or hide this actor

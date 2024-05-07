@@ -12,6 +12,11 @@ class REFRIGERHATER_API ARHResourceBase : public AActor
 {
 	GENERATED_BODY()
 	
+    float BaseZ; // Base Z position of the arrow
+    bool bGoingUp; // Direction control
+    float MovementSpeed; // Speed of the arrow's movement
+    float MovementRange; // Range of the movement (amplitude)
+	
 public: 
 	// Sets default values for this actor's properties
 	ARHResourceBase();
@@ -26,13 +31,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UParticleSystemComponent* ParticleSystemComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UArrowComponent* ArrowComponent;
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
 
 public: 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// Function to handle the resource pickup
 	UFUNCTION()

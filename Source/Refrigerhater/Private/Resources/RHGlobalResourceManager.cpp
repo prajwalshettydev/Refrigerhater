@@ -26,11 +26,15 @@ ARHGlobalResourceManager::ARHGlobalResourceManager()
 void ARHGlobalResourceManager::BeginPlay()
 {
 	Super::BeginPlay();
-	// Get the game state and bind to the delegate
-	ARHGameStateBase* GameState = GetWorld()->GetGameState<ARHGameStateBase>();
-	if (GameState)
+
+	if(HasAuthority()) //only spawn resources in the server
 	{
-		GameState->OnAllPlayersReady.AddDynamic(this, &ARHGlobalResourceManager::OnAllPlayersReady);
+		// Get the game state and bind to the delegate
+		ARHGameStateBase* GameState = GetWorld()->GetGameState<ARHGameStateBase>();
+		if (GameState)
+		{
+			GameState->OnAllPlayersReady.AddDynamic(this, &ARHGlobalResourceManager::OnAllPlayersReady);
+		}
 	}
 }
 
@@ -88,6 +92,5 @@ void ARHGlobalResourceManager::SpawnResourceAtLocation(const TArray<TSubclassOf<
 void ARHGlobalResourceManager::OnAllPlayersReady()
 {
 	GetWorldTimerManager().SetTimer(TimerHandle_Resource1, this, &ARHGlobalResourceManager::SpawnResource1, 30.0f, true, 0.0f);
-	GetWorldTimerManager().SetTimer(TimerHandle_Resource2, this, &ARHGlobalResourceManager::SpawnResource2, 30.0f, true, 120.0f);
-	
+	GetWorldTimerManager().SetTimer(TimerHandle_Resource2, this, &ARHGlobalResourceManager::SpawnResource2, 30.0f, true, 120.0f)
 }

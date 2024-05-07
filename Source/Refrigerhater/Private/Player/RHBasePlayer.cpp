@@ -21,7 +21,7 @@
 #include "Components/WidgetComponent.h"
 #include "Input/RHInputConfigData.h"
 #include "UI/RHWorldWidget.h"
-#include "Weapon/THProjectile.h"
+#include "Weapon/RHProjectile.h"
 
 #pragma region init
 
@@ -56,7 +56,7 @@ ARHBasePlayer::ARHBasePlayer()
 {
 	bReplicates = true;
 
-	Health = 100.f;
+	//Health = 100.f;
 	ResourceCapacity = 10; 
 
 	// Set size for player capsule
@@ -181,7 +181,7 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 	if (World != nullptr)
 	{
 		// Spawn the projectile at the muzzle.
-		if (ATHProjectile* Projectile = World->SpawnActor<ATHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation))
+		if (ARHProjectile* Projectile = World->SpawnActor<ARHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
 			// Disable collision with the player immediately on spawn
 			Projectile->SetActorEnableCollision(false);

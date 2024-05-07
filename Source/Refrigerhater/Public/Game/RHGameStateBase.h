@@ -22,8 +22,6 @@ private:
 	float TimeSinceLastReplication = 0.0f;
 	float ReplicationInterval = 1.0f;
 	
-	UFUNCTION()
-	void OnRep_PlayersReady() const;
 	
 	// Replicate player readiness
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -31,6 +29,9 @@ private:
     virtual void Tick(float DeltaSeconds) override;
 	
 public:
+	UFUNCTION()
+	void OnRep_PlayersReady() const;
+	
 	UPROPERTY(ReplicatedUsing=OnRep_PlayersReady)
 	bool bArePlayersReady; //or has the game started?
 

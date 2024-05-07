@@ -117,6 +117,9 @@ void ARHGameModeBase::StartGameCustom()
 	{
 		UE_LOG(LogPlayer, Log, TEXT("Everyones ready lets go"));
 		MyGameState->bArePlayersReady = true; // This will trigger OnRep_PlayersReady on all clients
+
+		//force call on rep ready on the server too!
+		MyGameState->OnRep_PlayersReady(); 
 	}
 }
 

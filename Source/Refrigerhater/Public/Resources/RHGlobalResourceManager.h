@@ -45,11 +45,13 @@ protected:
 private:
 	
 	void SpawnResource1();
-	void SpawnResource2();
-	FVector GenerateRandomPointInBox();
-	void SpawnResourceAtLocation(const TArray<TSubclassOf<ARHResourceBase>>& Resources, const FVector& Location);
+	void SpawnResource2() const;
+	FVector GenerateRandomPointInBox() const;
+	void SpawnResourceAtLocation(const TArray<TSubclassOf<ARHResourceBase>>& Resources, const FVector& Location) const;
 	
 protected:
+	UFUNCTION()
+	void OnAllPlayersReady();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	

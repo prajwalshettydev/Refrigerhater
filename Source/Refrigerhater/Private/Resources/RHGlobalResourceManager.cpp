@@ -4,7 +4,7 @@
 #include "Resources/RHGlobalResourceManager.h"
 
 #include "Components/BoxComponent.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Game/RHGameStateBase.h"
 #include "Resources/RHResourceBase.h"
 
 
@@ -26,9 +26,12 @@ ARHGlobalResourceManager::ARHGlobalResourceManager()
 void ARHGlobalResourceManager::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimer(TimerHandle_Resource1, this, &ARHGlobalResourceManager::SpawnResource1, 30.0f, true, 0.0f);
-	GetWorldTimerManager().SetTimer(TimerHandle_Resource2, this, &ARHGlobalResourceManager::SpawnResource2, 30.0f, true, 120.0f);
-	
+	// Get the game state and bind to the delegate
+	ARHGameStateBase* GameState = GetWorld()->GetGameState<ARHGameStateBase>();
+	if (GameState)
+	{
+		GameState->OnAllPlayersReady.AddDynamic(this, &ARHGlobalResourceManager::OnAllPlayersReady);
+	}
 }
 
 void ARHGlobalResourceManager::SpawnResource1()
@@ -46,11 +49,9 @@ void ARHGlobalResourceManager::SpawnResource1()
 	}
 }
 
-void ARHGlobalResourceManager::SpawnResource2()
+void ARHGlobalResourceManager::SpawnResource2() const
 {
-	int32 ResourcesToSpawn = 3;  // Number of resources to spawn each time function is called
-
-	if (SpawnedResources2.Num() + ResourcesToSpawn < MaxResource2Count)
+	if (constexpr int32 ResourcesToSpawn = 3; SpawnedResources2.Num() + ResourcesToSpawn < MaxResource2Count)
 	{
 		for (int32 i = 0; i < ResourcesToSpawn; i++)
 		{
@@ -60,12 +61,12 @@ void ARHGlobalResourceManager::SpawnResource2()
 	}
 }
 
-FVector ARHGlobalResourceManager::GenerateRandomPointInBox()
+FVector ARHGlobalResourceManager::GenerateRandomPointInBox() const
 {
-	FVector Origin = SpawnVolume->GetComponentLocation();
-	FVector BoxExtent = SpawnVolume->GetScaledBoxExtent();
+	const FVector Origin = SpawnVolume->GetComponentLocation();
+	const FVector BoxExtent = SpawnVolume->GetScaledBoxExtent();
 
-	FVector RandomPoint = Origin + FVector(
+	const FVector RandomPoint = Origin + FVector(
 		FMath::RandRange(-BoxExtent.X, BoxExtent.X),
 		FMath::RandRange(-BoxExtent.Y, BoxExtent.Y),
 		FMath::RandRange(-BoxExtent.Z, BoxExtent.Z)
@@ -74,12 +75,19 @@ FVector ARHGlobalResourceManager::GenerateRandomPointInBox()
 	return RandomPoint;
 }
 
-void ARHGlobalResourceManager::SpawnResourceAtLocation(const TArray<TSubclassOf<ARHResourceBase>>& Resources, const FVector& Location)
+void ARHGlobalResourceManager::SpawnResourceAtLocation(const TArray<TSubclassOf<ARHResourceBase>>& Resources, const FVector& Location) const
 {
-	TSubclassOf<ARHResourceBase> ChosenResource = Resources[FMath::RandRange(0, Resources.Num() - 1)];
-	AActor* Spawned = GetWorld()->SpawnActor<ARHResourceBase>(ChosenResource, Location, FRotator::ZeroRotator);
-	if (Spawned)
+	const TSubclassOf<ARHResourceBase> ChosenResource = Resources[FMath::RandRange(0, Resources.Num() - 1)];
+	if (AActor* Spawned = GetWorld()->SpawnActor<ARHResourceBase>(ChosenResource, Location, FRotator::ZeroRotator))
 	{
 		Spawned->SetActorLocation(Location, false, nullptr, ETeleportType::TeleportPhysics);
 	}
+}
+
+//alias, on game starts!!
+void ARHGlobalResourceManager::OnAllPlayersReady()
+{
+	GetWorldTimerManager().SetTimer(TimerHandle_Resource1, this, &ARHGlobalResourceManager::SpawnResource1, 30.0f, true, 0.0f);
+	GetWorldTimerManager().SetTimer(TimerHandle_Resource2, this, &ARHGlobalResourceManager::SpawnResource2, 30.0f, true, 120.0f);
+	
 }

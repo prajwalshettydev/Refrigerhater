@@ -5,23 +5,55 @@
 
 #include "RHGameModeBase.h"
 #include "Components/BoxComponent.h"
+#include "Components/TextRenderComponent.h"
 
 
 // Sets default values
 ARHResourceDropLocation::ARHResourceDropLocation()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
+	// Create and setup components
 	DropZone = CreateDefaultSubobject<UBoxComponent>(TEXT("DropZone"));
 	DropZone->SetCollisionProfileName(TEXT("Trigger"));
 	RootComponent = DropZone;
 
-	DropZone->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceDropLocation::OnResourceDropped);
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetupAttachment(RootComponent);
+
+	TextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextComponent"));
+	TextComponent->SetupAttachment(RootComponent);
+	TextComponent->SetText(FText::FromString(TEXT("Drop Location")));
+	TextComponent->SetWorldSize(100.0f);  // Adjust size as needed
+	TextComponent->SetRelativeLocation(FVector(0, 0, 100));  // Adjust to position text above the mesh
 }
 
 void ARHResourceDropLocation::BeginPlay()
 {
 	Super::BeginPlay();
+	DropZone->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceDropLocation::OnResourceDropped);
+}
+
+void ARHResourceDropLocation::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	CurrentAngleDegrees += MovementSpeed * DeltaTime;
+	if (CurrentAngleDegrees >= 360.0f)
+	{
+		CurrentAngleDegrees -= 360.0f;  // Wrap angle to prevent overflow
+	}
+
+	// Calculate new position
+	float Rad = FMath::DegreesToRadians(CurrentAngleDegrees);
+	FVector NewLocation = GetLevelCenter() + FVector(FMath::Cos(Rad) * MovementRadius, FMath::Sin(Rad) * MovementRadius, 70.0f);
+	SetActorLocation(NewLocation);
+}
+
+FVector ARHResourceDropLocation::GetLevelCenter() const
+{
+	// Placeholder for getting the center of the level; adjust as necessary
+	return FVector(0.0f, 0.0f, 0.0f);
 }
 
 void ARHResourceDropLocation::OnResourceDropped(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

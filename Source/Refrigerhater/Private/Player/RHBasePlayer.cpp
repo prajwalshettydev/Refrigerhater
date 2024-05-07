@@ -215,8 +215,6 @@ void ARHBasePlayer::FireWeapon(const FVector& Direction)
 	ServerFireWeapon(Direction);
 }
 
-
-
 void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -296,11 +294,6 @@ float ARHBasePlayer::TakeDamage(float DamageAmount, struct FDamageEvent const& D
 
 #pragma endregion
 
-void ARHBasePlayer::GatherResources()
-{
-	
-}
-
 #pragma region Input
 
 void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
@@ -371,6 +364,7 @@ void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 #pragma endregion
 
+#pragma region replication
 void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -380,7 +374,6 @@ void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ARHBasePlayer, PlayerColor);
 	// Add oth
 }
-
 
 void ARHBasePlayer::OnRep_PlayerName()
 {
@@ -416,11 +409,10 @@ void ARHBasePlayer::OnRep_PlayerColor()
 
 void ARHBasePlayer::OnRep_Health()
 {
-
-
-	
 	OnHealthChanged.Broadcast(Health);
 }
+
+#pragma endregion
 
 bool ARHBasePlayer::AddResource(const FString& ResourceType, int32 Amount)
 {
@@ -463,6 +455,7 @@ void ARHBasePlayer::HandleDeath()
 
 	// Log death
 	UE_LOG(LogTemp, Warning, TEXT("Player has died. Scheduling respawn."));
+	OnPlayerDead.Broadcast();
 
 	// Schedule respawn
 	FTimerHandle RespawnTimerHandle;
@@ -486,22 +479,9 @@ void ARHBasePlayer::Respawn()
 
 	// Reactivate player controls
 	MyController->EnableInput(nullptr);
+	OnPlayerRespawn.Broadcast();
 
 	// Make the player visible again
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 }
-
-// void ARHBasePlayer::MulticastFireWeapon_Implementation(const FVector& Direction)
-// {
-// 	if (ProjectileClass != nullptr)
-// 	{
-// 		// Check if this is the owning client and skip the following logic if it is
-// 		if (IsLocallyControlled())
-// 		{
-// 			return;
-// 		}
-// 		
-// 		ProjectileSpawn(Direction);
-// 	}
-// }

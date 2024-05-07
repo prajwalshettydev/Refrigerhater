@@ -52,6 +52,8 @@ ARHResourceBase::ARHResourceBase()
     bGoingUp = true;
     MovementSpeed = 45.0f; // Set a movement speed
     MovementRange = 40.0f; // Set the range of movement
+
+    SetReplicates(true);
 }
 
 // Called when the game starts or when spawned

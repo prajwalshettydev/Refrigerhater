@@ -14,12 +14,14 @@ ARHProjectile::ARHProjectile()
 	// Initialize components
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
 	RootComponent = ProjectileMesh;
+	ProjectileMesh->bApplyImpulseOnDamage = false;
 
 	// Create a simple sphere collider
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	CollisionComponent->InitSphereRadius(15.0f);
 	CollisionComponent->BodyInstance.SetCollisionProfileName("Projectile"); // Bind hit event
 	RootComponent = CollisionComponent;
+	CollisionComponent->bApplyImpulseOnDamage = false;
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 3000.f;
@@ -49,6 +51,7 @@ FVector NormalImpulse, const FHitResult& Hit)
 	{
 		if (APawn* HitPawn = Cast<APawn>(OtherActor))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Applying damage: %f"), Damage);
 			UGameplayStatics::ApplyDamage(HitPawn, Damage, GetInstigatorController(), this, UDamageType::StaticClass());
 		}
 
@@ -57,5 +60,6 @@ FVector NormalImpulse, const FHitResult& Hit)
 
 		SetLifeSpan(0.1);
 		HitComponent->SetNotifyRigidBodyCollision(false);
+		
 	}
 }

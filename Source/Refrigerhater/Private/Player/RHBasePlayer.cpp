@@ -101,11 +101,7 @@ ARHBasePlayer::ARHBasePlayer()
 	NameTagComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	NameTagComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f)); // Adjust as necessary
 	NameTagComponent->SetDrawSize(FVector2D(200.0f, 50.0f)); // Adjust as necessary
-
-	if (HasAuthority())
-	{
-		Health = MaxHealth;
-	}
+	
 }
 
 void ARHBasePlayer::BeginPlay()
@@ -114,6 +110,9 @@ void ARHBasePlayer::BeginPlay()
 
 	if(HasAuthority())
 	{
+		Health = MaxHealth;
+		UE_LOG(LogTemp, Warning, TEXT("Player health startnow: %f"), Health);
+		
 		// Randomize player color using HSV
 		const uint8 Hue = FMath::RandRange(0, 255);
 		constexpr uint8 Saturation = 255;
@@ -123,7 +122,8 @@ void ARHBasePlayer::BeginPlay()
 
 		// Delay the initialization of the name tag to ensure all components are ready
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 4.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 3.0f, false);
+		PlayerName = "";
 	}
 
 		

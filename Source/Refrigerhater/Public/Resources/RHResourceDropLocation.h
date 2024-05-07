@@ -17,7 +17,7 @@ protected:
 	float MovementRadius = 4500.0f;  // Radius of the circle
 	
 	UPROPERTY(EditAnywhere)
-	float MovementSpeed = 10.0f;    // Speed of movement in degrees per second
+	float MovementSpeed = 5.0f;    // Speed of movement in degrees per second
 	
 	UPROPERTY(EditAnywhere)
 	float CurrentAngleDegrees = 0.0f;  // Current angle in the movement circle

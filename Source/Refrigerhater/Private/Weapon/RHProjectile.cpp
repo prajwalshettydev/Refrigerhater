@@ -60,6 +60,7 @@ FVector NormalImpulse, const FHitResult& Hit)
 
 		SetLifeSpan(0.1);
 		HitComponent->SetNotifyRigidBodyCollision(false);
+
 		
 	}
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
+#include "Resources/RHResourceBase.h"
 #include "Weapon/RHProjectile.h"
 #include "RHBasePlayer.generated.h"
 
@@ -82,7 +83,7 @@ public:
 	
 	// Resource inventory map
 	UPROPERTY(VisibleAnywhere, Category="Inventory")
-	TMap<FString, int32> ResourceInventory;
+	TMap<EResourceType, int32> ResourceInventory;
 
 	// Max inventory size
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
@@ -113,7 +114,7 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void InitializeNameTag();
 	void ProjectileSpawn(const FVector& Direction) const;
-	bool AddResource(const FString& ResourceType, int32 Amount);
+	bool AddResource(const EResourceType ResourceType, int32 Amount);
 	void Move(const FInputActionValue& InputActionValue);
 	void Look(const FInputActionValue& InputActionValue);
 	void Tap(const FInputActionValue& InputActionValue);

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "Resources/RHResourceBase.h"
 #include "RHGameStateBase.generated.h"
 
 //more on delegates in readme!! 
@@ -29,6 +30,18 @@ private:
     virtual void Tick(float DeltaSeconds) override;
 	
 public:
+	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Score")
+	int32 TeamAScore;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Score")
+	int32 TeamBScore;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Resource Points")
+	TMap<EResourceType, EResourceCategory> ResourceCategories;
+	
+    void AddScore(EResourceType ResourceType, bool IsTeamA);
+	
 	UFUNCTION()
 	void OnRep_PlayersReady() const;
 	

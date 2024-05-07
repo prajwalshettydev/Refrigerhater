@@ -20,6 +20,7 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
 #include "Input/RHInputConfigData.h"
+#include "Resources/RHResourceBase.h"
 #include "UI/RHWorldWidget.h"
 #include "Weapon/RHProjectile.h"
 
@@ -124,6 +125,9 @@ void ARHBasePlayer::BeginPlay()
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 3.0f, false);
 		PlayerName = "";
+		
+
+		CameraBoom->TargetArmLength = 8000.f;
 	}
 
 		
@@ -414,30 +418,26 @@ void ARHBasePlayer::OnRep_Health()
 
 #pragma endregion
 
-bool ARHBasePlayer::AddResource(const FString& ResourceType, int32 Amount)
+bool ARHBasePlayer::AddResource(EResourceType ResourceType, int32 Amount)
 {
-	if (ResourceInventory.Contains(ResourceType))
+	int32 RequiredSpace = 4 * Amount;  // Each resource takes 4 slots
+
+	if (ResourceInventory.Contains(ResourceType) && (ResourceInventory[ResourceType] + RequiredSpace <= MaxInventorySize))
 	{
-		if (ResourceInventory[ResourceType] + Amount <= MaxInventorySize)
-		{
-			ResourceInventory[ResourceType] += Amount;
-			return true;
-		}
+		ResourceInventory[ResourceType] += RequiredSpace;
+		return true;
 	}
-	else
+	else if (!ResourceInventory.Contains(ResourceType) && RequiredSpace <= MaxInventorySize)
 	{
-		if (Amount <= MaxInventorySize)
-		{
-			ResourceInventory.Add(ResourceType, Amount);
-			return true;
-		}
+		ResourceInventory.Add(ResourceType, RequiredSpace);
+		return true;
 	}
-	return false; // Inventory full or addition exceeds max size
+	return false;
 }
 
 void ARHBasePlayer::HandleResourcePickup(const FString& ResourceType, int32 Amount)
 {
-	if (!AddResource(ResourceType, Amount))
+	//if (!AddResource(ResourceType, Amount))
 	{
 		// Handle what happens if resource can't be added because inventory is full
 		// For example, display a message or ignore the pickup

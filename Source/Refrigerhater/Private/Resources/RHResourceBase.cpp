@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Player/RHBasePlayer.h"
 
+
 /* so each resource can spawn, get grabbed, vanish, allot.
  * 
  *
@@ -23,7 +24,6 @@ ARHResourceBase::ARHResourceBase()
     CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     CollisionComponent->InitSphereRadius(50.0f);
     CollisionComponent->SetCollisionProfileName(TEXT("ResourcePreeset"));
-    //CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
     RootComponent = CollisionComponent;
 
     // Create and initialize the mesh component
@@ -94,23 +94,14 @@ void ARHResourceBase::OnPickedUpBy(APawn* Pawn)
     Destroy();
 }
 
-void ARHResourceBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("resource successfull overlap, %s "), *OtherActor->GetName());
-    if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
-    {
-        OnPickedUpBy(Pawn);
-    }
-}
-
 void ARHResourceBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
-    // if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
-    // {
-    //     OnPickedUpBy(Pawn);
-    // }
+    if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
+        OnPickedUpBy(Pawn);
+    }
 }
  
 void ARHResourceBase::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

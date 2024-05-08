@@ -127,7 +127,7 @@ void ARHBasePlayer::BeginPlay()
 		PlayerName = "";
 		
 
-		CameraBoom->TargetArmLength = 8000.f;
+		CameraBoom->TargetArmLength = 6000.f;
 	}
 
 		
@@ -146,6 +146,13 @@ void ARHBasePlayer::InitializeNameTag()
 	FString RandomPlayerName = PossiblePlayerNames[FMath::RandRange(0, PossiblePlayerNames.Num() - 1)] + " ";
 	RandomPlayerName.AppendInt(FMath::RandRange(10, 99));
 	PlayerName = RandomPlayerName;
+
+	if(HasAuthority())
+	{
+		//manually call on rep functions for server
+		OnRep_PlayerName();
+		OnRep_PlayerColor();
+	}
 }
 
 void ARHBasePlayer::Tick(float DeltaTime)

@@ -18,8 +18,8 @@ ARHProjectile::ARHProjectile()
 
 	// Create a simple sphere collider
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-	CollisionComponent->InitSphereRadius(15.0f);
-	CollisionComponent->BodyInstance.SetCollisionProfileName("Projectile"); // Bind hit event
+	CollisionComponent->InitSphereRadius(18.0f);
+	CollisionComponent->SetCollisionProfileName("ProjectilePreset"); // Bind hit event
 	RootComponent = CollisionComponent;
 	CollisionComponent->bApplyImpulseOnDamage = false;
 

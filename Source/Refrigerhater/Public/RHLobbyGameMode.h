@@ -11,6 +11,8 @@ UCLASS()
 class REFRIGERHATER_API ARHLobbyGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	ARHLobbyGameMode();
 protected:
 	virtual void InitGameState() override;
 };

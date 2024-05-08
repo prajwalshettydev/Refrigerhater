@@ -91,7 +91,7 @@ void URHEosGameInstance::CreateSession(const FName sessionName)
 	sessionSettings.NumPublicConnections = true;
 	sessionSettings.bIsDedicated = false;
 	sessionSettings.bIsLANMatch = false;
-	sessionSettings.NumPublicConnections = 6;
+	sessionSettings.NumPublicConnections = 4;
 
 	sessionSettings.Set(sessionNameID, sessionName.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	currentSessionName = sessionName;
@@ -143,4 +143,9 @@ void URHEosGameInstance::JoinLobbyByIndex(int index)
 	FString lobbyToJoinName = GetSessionName(lobbyToJoin);
 	if (sessionPtr)
 		sessionPtr->JoinSession(0, FName(lobbyToJoinName), lobbyToJoin);
+}
+
+void URHEosGameInstance::StartGame()
+{
+	LoadLevelListen(gameLevel);
 }

@@ -2,6 +2,11 @@
 #include "RHEOSGameState.h"
 #include "RHEosGameInstance.h"
 
+ARHLobbyGameMode::ARHLobbyGameMode()
+{
+	bUseSeamlessTravel = true;
+}
+
 void ARHLobbyGameMode::InitGameState()
 {
 	Super::InitGameState();

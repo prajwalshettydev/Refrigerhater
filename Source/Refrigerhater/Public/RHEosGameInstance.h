@@ -33,6 +33,8 @@ public:
 	FString GetSessionName(const FOnlineSessionSearchResult result) const;
 
 	void JoinLobbyByIndex(int index);
+
+	void StartGame();
 protected:
 	virtual void Init() override;
 private:

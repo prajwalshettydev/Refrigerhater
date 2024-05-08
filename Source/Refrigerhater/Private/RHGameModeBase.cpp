@@ -13,7 +13,7 @@ ARHGameModeBase::ARHGameModeBase()
 	
 	PlayerControllerClass = ARHBasePlayerController::StaticClass();
 	DefaultPawnClass = ARHBasePlayer::StaticClass();
-
+	bUseSeamlessTravel = true;
 
 	// // Blueprinted Version, relies on the asset path obtained from the editor
 	// static ConstructorHelpers::FClassFinder<ARHBasePlayer> PlayerPawnClassFinder(TEXT("/Game/Player/BP_SingleDoorFridge.BP_SingleDoorFridge"));

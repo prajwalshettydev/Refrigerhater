@@ -4,27 +4,50 @@
 #include "RHLobbyMenu.h"
 #include "Components/TextBlock.h"
 #include "Components/ListView.h"
+#include "Components/TileView.h"
+#include "Components/Button.h"
 #include "RHEOSGameState.h"
+#include "RHEosPlayerState.h"
+#include "RHEosGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerState.h"
+#include "RHCharacterSelectionType.h"
+#include "RHCharacterEntry.h"
+#include "RHCharacterDisplay.h"
 
 void URHLobbyMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 	gameState = Cast<ARHEOSGameState>(UGameplayStatics::GetGameState(this));
+	playerState = GetOwningPlayerState<ARHEosPlayerState>();
 
-	if (gameState) {
+	if (!gameState || !playerState)
+		return;
 
-		FName lobbyName = gameState->GetSessionName();
-		lobbyNameDisplay->SetText(FText::FromName(lobbyName));
-		UE_LOG(LogTemp, Warning, TEXT("LOBBY NAME: %s"), *lobbyName.ToString())
+	FName lobbyName = gameState->GetSessionName();
+	lobbyNameDisplay->SetText(FText::FromName(lobbyName));
+	UE_LOG(LogTemp, Warning, TEXT("LOBBY NAME: %s"), *lobbyName.ToString())
 		gameState->OnSessionNameRep.AddDynamic(this, &URHLobbyMenu::SessionNameRep);
 
-		playerListDisplay->SetListItems(gameState->PlayerArray);
+	playerListDisplay->SetListItems(gameState->PlayerArray);
 
-		GetWorld()->GetTimerManager().SetTimer(playerListUpdateTimer, this, &URHLobbyMenu::RefreshPlayerList, 1, true);
-	}
+	GetWorld()->GetTimerManager().SetTimer(playerListUpdateTimer, this, &URHLobbyMenu::RefreshPlayerList, 1, true);
+	gameState->OnCharacterChosenRep.AddDynamic(this, &URHLobbyMenu::CharacterChoiceReplicated);
 
+	characterListDisplay->SetListItems(gameState->GetCharacterChoices());
+	characterListDisplay->OnItemSelectionChanged().AddUObject(this, &URHLobbyMenu::PlayerHasChosenCharacter);
+
+	FActorSpawnParameters spawnParams;
+	APlayerController* owningPC = GetOwningPlayer();
+	spawnParams.Owner = owningPC;
+
+	displayCharacter = GetWorld()->SpawnActor<ARHCharacterDisplay>(characterDisplayClass, spawnParams);
+
+	owningPC->SetViewTarget(displayCharacter);
+
+	playerState->OnChosenCharacterReplicated.AddDynamic(displayCharacter, &ARHCharacterDisplay::SetCharacter);
+
+	startGameButton->OnClicked.AddDynamic(this, &URHLobbyMenu::LoadGame);
 
 }
 
@@ -34,8 +57,41 @@ void URHLobbyMenu::SessionNameRep(const FName& newSessionName)
 	UE_LOG(LogTemp, Warning, TEXT("LOBBY NAME: %s"), *lobbyNameDisplay->GetText().ToString())
 }
 
+void URHLobbyMenu::CharacterChoiceReplicated(const URHCharacterSelectionType* newChoice, const URHCharacterSelectionType* oldChoice)
+{
+	if (newChoice == nullptr)
+		return;
+
+	URHCharacterEntry* newCharEntry = characterListDisplay->GetEntryWidgetFromItem<URHCharacterEntry>(newChoice);
+	newCharEntry->SetChosen(true);
+
+	if (oldChoice == nullptr)
+		return;
+
+	newCharEntry = characterListDisplay->GetEntryWidgetFromItem<URHCharacterEntry>(oldChoice);
+	newCharEntry->SetChosen(false);
+
+}
+
+void URHLobbyMenu::LoadGame()
+{
+	URHEosGameInstance* gameInstance = GetGameInstance<URHEosGameInstance>();
+
+	if (!gameInstance)
+		return;
+
+	gameInstance->StartGame();
+}
+
 void URHLobbyMenu::RefreshPlayerList()
 {
-	if(gameState)
+	if (gameState)
 		playerListDisplay->SetListItems(gameState->PlayerArray);
+}
+
+void URHLobbyMenu::PlayerHasChosenCharacter(UObject* listIem)
+{
+	URHCharacterSelectionType* chosenCharacter = Cast<URHCharacterSelectionType>(listIem);
+	if (chosenCharacter)
+		playerState->Server_IssueCharacterChoice(chosenCharacter);
 }

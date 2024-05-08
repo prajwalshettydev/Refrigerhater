@@ -4,6 +4,7 @@
 #include "Resources/RHResourceBase.h"
 
 #include "Components/ArrowComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Player/RHBasePlayer.h"
@@ -20,9 +21,10 @@ ARHResourceBase::ARHResourceBase()
     PrimaryActorTick.bCanEverTick = true;
 
     // Create and initialize the sphere collision component
-    CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
-    CollisionComponent->InitSphereRadius(50.0f);
-    CollisionComponent->SetCollisionProfileName(TEXT("ResourcePreeset"));
+    CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBoxComponent"));
+    CollisionComponent->InitBoxExtent(FVector(25,25,25));
+    CollisionComponent->SetCollisionProfileName(TEXT("ResourcePreset"));
+    CollisionComponent->SetEnableGravity(true);
     //CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
     RootComponent = CollisionComponent;
 
@@ -42,16 +44,19 @@ ARHResourceBase::ARHResourceBase()
     
     ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
     ArrowComponent->SetupAttachment(CollisionComponent);
-    ArrowComponent->SetRelativeLocation(FVector(0,0,120.0));
+    ArrowComponent->SetRelativeLocation(FVector(0,0,150.0));
     ArrowComponent->SetRelativeScale3D(FVector(1,1,1));
     ArrowComponent->SetRelativeRotation(FRotator(-90, 0, 0));
-    ArrowComponent->ArrowSize = 2.5f;
+    ArrowComponent->ArrowSize = 2.0f;
     ArrowComponent->ArrowLength = 60.0f;
-    ArrowComponent->ArrowColor = FColor::Purple;
+    ArrowComponent->ArrowColor = FColor::Black;
     BaseZ = 40.0f;
     bGoingUp = true;
     MovementSpeed = 45.0f; // Set a movement speed
-    MovementRange = 40.0f; // Set the range of movement
+    MovementRange = 50.0f; // Set the range of movement
+
+    
+    SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -60,8 +65,7 @@ void ARHResourceBase::BeginPlay()
     Super::BeginPlay();
     
     CollisionComponent->OnComponentBeginOverlap.AddDynamic(this,&ARHResourceBase::OverlapBegin);
-    CollisionComponent->OnComponentEndOverlap.AddDynamic(this,&ARHResourceBase::OverlapEnd);
-    MeshComponent->SetSimulatePhysics(true);
+    //
     BaseZ = ArrowComponent->GetComponentLocation().Z;
 }
 
@@ -92,28 +96,13 @@ void ARHResourceBase::OnPickedUpBy(APawn* Pawn)
     Destroy();
 }
 
-void ARHResourceBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("resource successfull overlap, %s "), *OtherActor->GetName());
-    if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
-    {
-        OnPickedUpBy(Pawn);
-    }
-}
-
 void ARHResourceBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
-    // if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
-    // {
-    //     OnPickedUpBy(Pawn);
-    // }
+    if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
+        OnPickedUpBy(Pawn);
+    }
 }
  
-void ARHResourceBase::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-
-    UE_LOG(LogTemp, Warning, TEXT("resoussarce successfull endoverlap, %s "), *OtherActor->GetName());
-}

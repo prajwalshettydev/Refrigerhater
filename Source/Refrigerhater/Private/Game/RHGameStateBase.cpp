@@ -9,6 +9,12 @@ ARHGameStateBase::ARHGameStateBase()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//any new resources we add can be easily be appended here, or in the future if we have 10 to 50+ resource then this can also moved to a dynamic mapping function or the child resource objects can tag themselves as particular resources.
+	ResourceCategories.Add(EResourceType::BigWatermelon, EResourceCategory::Legendary);
+	ResourceCategories.Add(EResourceType::BeerCrate, EResourceCategory::Ordinary);
+	ResourceCategories.Add(EResourceType::TomatoCrate, EResourceCategory::Ordinary);
+	ResourceCategories.Add(EResourceType::BananaCrate, EResourceCategory::Ordinary);
 }
 
 
@@ -19,7 +25,25 @@ void ARHGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ARHGameStateBase, PlayerReadiness);
 	DOREPLIFETIME(ARHGameStateBase, bArePlayersReady);
 	DOREPLIFETIME(ARHGameStateBase, GameTimeSeconds);
+	DOREPLIFETIME(ARHGameStateBase, TeamAScore);
+	DOREPLIFETIME(ARHGameStateBase, TeamBScore);
 }
+
+// GameState.cpp
+void ARHGameStateBase::AddScore(EResourceType ResourceType, bool IsTeamA)
+{
+	const int32 Points = (ResourceCategories[ResourceType] == EResourceCategory::Legendary) ? 8 : 4;
+
+	if (IsTeamA)
+	{
+		TeamAScore += Points;
+	}
+	else
+	{
+		TeamBScore += Points;
+	}
+}
+
 
 FString ARHGameStateBase::GetFormattedGameTime() const
 {

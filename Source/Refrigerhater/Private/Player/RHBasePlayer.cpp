@@ -101,11 +101,6 @@ ARHBasePlayer::ARHBasePlayer()
 	NameTagComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	NameTagComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f)); // Adjust as necessary
 	NameTagComponent->SetDrawSize(FVector2D(200.0f, 50.0f)); // Adjust as necessary
-
-	if (HasAuthority())
-	{
-		Health = MaxHealth;
-	}
 }
 
 void ARHBasePlayer::BeginPlay()
@@ -114,6 +109,9 @@ void ARHBasePlayer::BeginPlay()
 
 	if(HasAuthority())
 	{
+		Health = MaxHealth;
+		UE_LOG(LogTemp, Warning, TEXT("Player health startnow: %f"), Health);
+		
 		// Randomize player color using HSV
 		const uint8 Hue = FMath::RandRange(0, 255);
 		constexpr uint8 Saturation = 255;
@@ -123,7 +121,10 @@ void ARHBasePlayer::BeginPlay()
 
 		// Delay the initialization of the name tag to ensure all components are ready
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 4.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 3.0f, false);
+		PlayerName = "";
+		
+		CameraBoom->TargetArmLength = 6000.f;
 	}
 
 		
@@ -142,6 +143,13 @@ void ARHBasePlayer::InitializeNameTag()
 	FString RandomPlayerName = PossiblePlayerNames[FMath::RandRange(0, PossiblePlayerNames.Num() - 1)] + " ";
 	RandomPlayerName.AppendInt(FMath::RandRange(10, 99));
 	PlayerName = RandomPlayerName;
+
+	if(HasAuthority())
+	{
+		//manually call on rep functions for server
+		OnRep_PlayerName();
+		OnRep_PlayerColor();
+	}
 }
 
 void ARHBasePlayer::Tick(float DeltaTime)
@@ -414,30 +422,26 @@ void ARHBasePlayer::OnRep_Health()
 
 #pragma endregion
 
-bool ARHBasePlayer::AddResource(const FString& ResourceType, int32 Amount)
+bool ARHBasePlayer::AddResource(EResourceType ResourceType, int32 Amount)
 {
-	if (ResourceInventory.Contains(ResourceType))
+	int32 RequiredSpace = 4 * Amount;  // Each resource takes 4 slots
+
+	if (ResourceInventory.Contains(ResourceType) && (ResourceInventory[ResourceType] + RequiredSpace <= MaxInventorySize))
 	{
-		if (ResourceInventory[ResourceType] + Amount <= MaxInventorySize)
-		{
-			ResourceInventory[ResourceType] += Amount;
-			return true;
-		}
+		ResourceInventory[ResourceType] += RequiredSpace;
+		return true;
 	}
-	else
+	else if (!ResourceInventory.Contains(ResourceType) && RequiredSpace <= MaxInventorySize)
 	{
-		if (Amount <= MaxInventorySize)
-		{
-			ResourceInventory.Add(ResourceType, Amount);
-			return true;
-		}
+		ResourceInventory.Add(ResourceType, RequiredSpace);
+		return true;
 	}
 	return false; // Inventory full or addition exceeds max size
 }
 
 void ARHBasePlayer::HandleResourcePickup(const FString& ResourceType, int32 Amount)
 {
-	if (!AddResource(ResourceType, Amount))
+	// if (!AddResource(ResourceType, Amount))
 	{
 		// Handle what happens if resource can't be added because inventory is full
 		// For example, display a message or ignore the pickup

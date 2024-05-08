@@ -7,6 +7,21 @@
 #include "GameFramework/Actor.h"
 #include "RHResourceBase.generated.h"
 
+UENUM(BlueprintType)
+enum class EResourceType : uint8
+{
+	BeerCrate UMETA(DisplayName = "Beer Crate"),
+	TomatoCrate UMETA(DisplayName = "Tomato Crate"),
+	BananaCrate UMETA(DisplayName = "Banana Crate"),
+	BigWatermelon UMETA(DisplayName = "Big Watermelon")
+};
+
+UENUM(BlueprintType)
+enum class EResourceCategory : uint8
+{
+	Ordinary UMETA(DisplayName = "Ordinary"),
+	Legendary UMETA(DisplayName = "Legendary")
+};
 UCLASS()
 class REFRIGERHATER_API ARHResourceBase : public AActor
 {
@@ -23,7 +38,7 @@ public:
 	
 	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USphereComponent* CollisionComponent;
+	class UBoxComponent* CollisionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MeshComponent;
@@ -33,6 +48,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UArrowComponent* ArrowComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Resource")
+	EResourceType ResourceType;
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,12 +61,7 @@ public:
 	// Function to handle the resource pickup
 	UFUNCTION()
 	void OnPickedUpBy(APawn* Pawn);
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	                    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-
-	UFUNCTION()
-	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

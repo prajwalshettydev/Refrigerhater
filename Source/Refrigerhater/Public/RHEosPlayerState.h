@@ -15,10 +15,12 @@ class REFRIGERHATER_API ARHEosPlayerState : public APlayerState
 public:
 	ARHEosPlayerState();
 	FOnChosenCharacterReplicated OnChosenCharacterReplicated;
-
+	TSubclassOf<class ACharacter> GetChosenCharacter() const;
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_IssueCharacterChoice(class URHCharacterSelectionType* newCharChoice);
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ACharacter> defaultChar;
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
 	virtual void CopyProperties(APlayerState* PlayerState) override;

@@ -6,16 +6,16 @@
 #include "RHCharacterDisplay.generated.h"
 
 UCLASS()
-class REFRIGERHATER_API ARHCharacterDisplay : public ACharacter
+class REFRIGERHATER_API ARHCharacterDisplay : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	ARHCharacterDisplay();
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	USkeletalMeshComponent* MeshComp;
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	UCameraComponent* ViewCamera;
 
 	UFUNCTION()

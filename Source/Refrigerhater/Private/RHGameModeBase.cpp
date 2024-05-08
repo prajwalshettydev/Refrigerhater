@@ -1,11 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "RHGameModeBase.h"
-
 #include "RHCustomLog.h"
 #include "Player/RHBasePlayer.h"
 #include "Player/RHBasePlayerController.h"
+#include "RHEosPlayerState.h"
 
 
 ARHGameModeBase::ARHGameModeBase()
@@ -54,4 +51,15 @@ void ARHGameModeBase::PostLogin(APlayerController* NewPlayer)
 	{
 		UE_LOG(LogPlayer, Error, TEXT("Failed to find the player pawn"));
 	}
+}
+
+UClass* ARHGameModeBase::GetDefaultPawnClassForController_Implementation(AController* InController)
+{
+	ARHEosPlayerState* playerState = InController->GetPlayerState<ARHEosPlayerState>();
+
+	if(playerState)
+		if (playerState->GetChosenCharacter())
+			return playerState->GetChosenCharacter();
+
+	return Super::GetDefaultPawnClassForController(InController);
 }

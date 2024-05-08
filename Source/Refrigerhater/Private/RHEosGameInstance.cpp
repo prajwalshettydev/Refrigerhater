@@ -87,7 +87,7 @@ void URHEosGameInstance::CreateSession(const FName sessionName)
 	sessionSettings.bShouldAdvertise = true;
 	sessionSettings.bUseLobbiesIfAvailable = true;
 	sessionSettings.bAllowJoinViaPresence = true;
-	sessionSettings.bAllowJoinInProgress = true;
+	sessionSettings.bAllowJoinInProgress = false;
 	sessionSettings.NumPublicConnections = true;
 	sessionSettings.bIsDedicated = false;
 	sessionSettings.bIsLANMatch = false;
@@ -105,9 +105,8 @@ void URHEosGameInstance::LoadLevelListen(TSoftObjectPtr<UWorld> levelToLoad)
 	// Load the Level if not already loaded
 	if (!levelToLoad.IsValid())
 		levelToLoad.LoadSynchronous();
-
+	UE_LOG(LogTemp, Warning, TEXT("LEVEL: %s"), *levelToLoad.ToString());
 	if (levelToLoad.IsValid()) {
-
 		const FName levelName = FName(*FPackageName::ObjectPathToPackageName(levelToLoad.ToString()));
 		GetWorld()->ServerTravel(levelName.ToString() + "?listen");
 	}

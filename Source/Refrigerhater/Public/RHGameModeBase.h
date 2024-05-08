@@ -23,4 +23,6 @@ public:
 	
 	virtual void StartPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+protected:
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 };

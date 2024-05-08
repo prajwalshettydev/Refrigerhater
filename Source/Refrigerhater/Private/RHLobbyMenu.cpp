@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "RHLobbyMenu.h"
 #include "Components/TextBlock.h"
 #include "Components/ListView.h"
@@ -32,23 +29,23 @@ void URHLobbyMenu::NativeConstruct()
 	playerListDisplay->SetListItems(gameState->PlayerArray);
 
 	GetWorld()->GetTimerManager().SetTimer(playerListUpdateTimer, this, &URHLobbyMenu::RefreshPlayerList, 1, true);
-	gameState->OnCharacterChosenRep.AddDynamic(this, &URHLobbyMenu::CharacterChoiceReplicated);
 
 	characterListDisplay->SetListItems(gameState->GetCharacterChoices());
 	characterListDisplay->OnItemSelectionChanged().AddUObject(this, &URHLobbyMenu::PlayerHasChosenCharacter);
+
+	gameState->OnCharacterChosenRep.AddDynamic(this, &URHLobbyMenu::CharacterChoiceReplicated);
 
 	FActorSpawnParameters spawnParams;
 	APlayerController* owningPC = GetOwningPlayer();
 	spawnParams.Owner = owningPC;
 
 	displayCharacter = GetWorld()->SpawnActor<ARHCharacterDisplay>(characterDisplayClass, spawnParams);
-
+	UE_LOG(LogTemp, Warning, TEXT("DISPLAY CHAR: %s"), displayCharacter==nullptr? TEXT("TRUE") : TEXT("FALSE"));
 	owningPC->SetViewTarget(displayCharacter);
 
 	playerState->OnChosenCharacterReplicated.AddDynamic(displayCharacter, &ARHCharacterDisplay::SetCharacter);
 
 	startGameButton->OnClicked.AddDynamic(this, &URHLobbyMenu::LoadGame);
-
 }
 
 void URHLobbyMenu::SessionNameRep(const FName& newSessionName)
@@ -59,18 +56,15 @@ void URHLobbyMenu::SessionNameRep(const FName& newSessionName)
 
 void URHLobbyMenu::CharacterChoiceReplicated(const URHCharacterSelectionType* newChoice, const URHCharacterSelectionType* oldChoice)
 {
-	if (newChoice == nullptr)
-		return;
+	if (newChoice != nullptr) {
+		URHCharacterEntry* newCharEntry = characterListDisplay->GetEntryWidgetFromItem<URHCharacterEntry>(newChoice);
+		newCharEntry->SetChosen(true);
+	}
 
-	URHCharacterEntry* newCharEntry = characterListDisplay->GetEntryWidgetFromItem<URHCharacterEntry>(newChoice);
-	newCharEntry->SetChosen(true);
-
-	if (oldChoice == nullptr)
-		return;
-
-	newCharEntry = characterListDisplay->GetEntryWidgetFromItem<URHCharacterEntry>(oldChoice);
-	newCharEntry->SetChosen(false);
-
+	if (oldChoice != nullptr) {
+		URHCharacterEntry* oldCharEntry = characterListDisplay->GetEntryWidgetFromItem<URHCharacterEntry>(oldChoice);
+		oldCharEntry->SetChosen(false);
+	}
 }
 
 void URHLobbyMenu::LoadGame()

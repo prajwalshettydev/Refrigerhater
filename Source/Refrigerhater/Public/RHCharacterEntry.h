@@ -24,7 +24,5 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	FName iconMatName{"Icon"};	
 	UPROPERTY(EditDefaultsOnly)
-	FName iconSatName{"Saturation"};
-
-
+	FName iconSatName{"Saturation"};	
 };

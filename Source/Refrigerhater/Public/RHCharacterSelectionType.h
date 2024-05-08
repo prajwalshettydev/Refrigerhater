@@ -21,5 +21,13 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UAnimInstance> charIdleAnim;
 
+	void SetChoices(int val) { choicesMade += val; };
+	bool GetOverMaxChoices() { return choicesMade >= maxChoices; };
+
 	USkeletalMesh* GetSkelMesh() const;
+private:
+	UPROPERTY(EditDefaultsOnly)
+	int maxChoices = 1;
+	UPROPERTY(EditDefaultsOnly)
+	int choicesMade = 0;
 };

@@ -39,7 +39,7 @@ void ARHCharacterDisplay::SetCharacter(const URHCharacterSelectionType* newSelec
 {
 	if (!newSelection)
 		return;
-
+	UE_LOG(LogTemp, Warning, TEXT("CHAR NAME: %s"), *newSelection->charName.ToString())
 	MeshComp->SetSkeletalMesh(newSelection->GetSkelMesh());
 	MeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	MeshComp->AnimClass = newSelection->charIdleAnim;

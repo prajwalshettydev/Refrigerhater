@@ -1,16 +1,16 @@
-#include "RHLobbyMenu.h"
+#include "EosSetup/RHLobbyMenu.h"
 #include "Components/TextBlock.h"
 #include "Components/ListView.h"
 #include "Components/TileView.h"
 #include "Components/Button.h"
-#include "RHEOSGameState.h"
-#include "RHEosPlayerState.h"
-#include "RHEosGameInstance.h"
+#include "EosSetup/RHEOSGameState.h"
+#include "EosSetup/RHEosPlayerState.h"
+#include "EosSetup/RHEosGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerState.h"
-#include "RHCharacterSelectionType.h"
-#include "RHCharacterEntry.h"
-#include "RHCharacterDisplay.h"
+#include "EosSetup/RHCharacterSelectionType.h"
+#include "EosSetup/RHCharacterEntry.h"
+#include "EosSetup/RHCharacterDisplay.h"
 
 void URHLobbyMenu::NativeConstruct()
 {

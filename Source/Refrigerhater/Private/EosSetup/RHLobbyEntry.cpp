@@ -1,4 +1,4 @@
-#include "RHLobbyEntry.h"
+#include "EosSetup/RHLobbyEntry.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 

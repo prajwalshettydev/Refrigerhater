@@ -3,9 +3,7 @@
 
 #include "..\Public\Player\RHBasePlayerController.h"
 
-#include "RHCustomLog.h"
 #include "RHGameModeBase.h"
-#include "Player/RHBasePlayer.h"
 
 void ARHBasePlayerController::OnPossess(APawn* InPawn)
 {

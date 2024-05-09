@@ -1,4 +1,4 @@
-#include "RHEOSGameState.h"
+#include "EosSetup/RHEOSGameState.h"
 #include "Net/UnrealNetwork.h"
 
 void ARHEOSGameState::SetSessionName(const FName& sessionNameToSet)

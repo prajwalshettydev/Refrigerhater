@@ -8,7 +8,7 @@
 #include "Player/RHBasePlayer.h"
 #include "Player/RHBasePlayerController.h"
 #include "Player/RHBasePlayerState.h"
-#include "RHEosPlayerState.h"
+#include "EosSetup/RHEosPlayerState.h"
 
 
 ARHGameModeBase::ARHGameModeBase()

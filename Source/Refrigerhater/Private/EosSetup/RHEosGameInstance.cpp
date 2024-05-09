@@ -1,4 +1,4 @@
-#include "RHEosGameInstance.h"
+#include "EosSetup/RHEosGameInstance.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "Interfaces/OnlineSessionInterface.h"

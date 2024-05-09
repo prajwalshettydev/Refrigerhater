@@ -1,9 +1,9 @@
-#include "RHMainMenu.h"
-#include "RHEosGameInstance.h"
+#include "EosSetup/RHMainMenu.h"
+#include "EosSetup/RHEosGameInstance.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
 #include "Components/ScrollBox.h"
-#include "RHLobbyEntry.h"
+#include "EosSetup/RHLobbyEntry.h"
 
 void URHMainMenu::NativeConstruct()
 {

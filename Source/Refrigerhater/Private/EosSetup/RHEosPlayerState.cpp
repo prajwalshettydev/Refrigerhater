@@ -1,8 +1,8 @@
-#include "RHEosPlayerState.h"
+#include "EosSetup/RHEosPlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "RHEOSGameState.h"
+#include "EosSetup/RHEOSGameState.h"
 #include "Kismet/GameplayStatics.h"
-#include "RHCharacterSelectionType.h"
+#include "EosSetup/RHCharacterSelectionType.h"
 
 ARHEosPlayerState::ARHEosPlayerState()
 {

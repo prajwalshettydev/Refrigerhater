@@ -1,4 +1,4 @@
-#include "RHEosPlayerController.h"
+#include "EosSetup/RHEosPlayerController.h"
 
 void ARHEosPlayerController::OnRep_PlayerState()
 {

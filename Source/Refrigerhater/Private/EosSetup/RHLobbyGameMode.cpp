@@ -1,6 +1,6 @@
-#include "RHLobbyGameMode.h"
-#include "RHEOSGameState.h"
-#include "RHEosGameInstance.h"
+#include "EosSetup/RHLobbyGameMode.h"
+#include "EosSetup/RHEOSGameState.h"
+#include "EosSetup/RHEosGameInstance.h"
 
 ARHLobbyGameMode::ARHLobbyGameMode()
 {

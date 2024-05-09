@@ -1,4 +1,4 @@
-#include "RHCharacterSelectionType.h"
+#include "EosSetup/RHCharacterSelectionType.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
 

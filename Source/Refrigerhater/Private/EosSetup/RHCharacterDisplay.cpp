@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RHCharacterDisplay.h"
+#include "EosSetup/RHCharacterDisplay.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
-#include "RHCharacterSelectionType.h"
+#include "EosSetup/RHCharacterSelectionType.h"
 
 // Sets default values
 ARHCharacterDisplay::ARHCharacterDisplay()

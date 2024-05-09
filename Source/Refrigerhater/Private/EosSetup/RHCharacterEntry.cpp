@@ -1,7 +1,7 @@
-#include "RHCharacterEntry.h"
+#include "EosSetup/RHCharacterEntry.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include "RHCharacterSelectionType.h"
+#include "EosSetup/RHCharacterSelectionType.h"
 
 void URHCharacterEntry::SetChosen(bool value)
 {

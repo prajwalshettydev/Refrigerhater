@@ -71,7 +71,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	void AddPointsForTeam(const FString& ResourceType, int32 Quantity, int32 TeamID);
-
-
-
+	
+	//virtual void StartPlay() override;
+	
+protected:
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 };

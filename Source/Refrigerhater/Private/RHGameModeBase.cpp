@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "RHGameModeBase.h"
 
 #include "EngineUtils.h"
@@ -11,6 +8,7 @@
 #include "Player/RHBasePlayer.h"
 #include "Player/RHBasePlayerController.h"
 #include "Player/RHBasePlayerState.h"
+#include "RHEosPlayerState.h"
 
 
 ARHGameModeBase::ARHGameModeBase()
@@ -23,6 +21,18 @@ ARHGameModeBase::ARHGameModeBase()
 	bStartPlayersAsSpectators = true;
 	
 	CacheTeamSpawnPoints();
+	bUseSeamlessTravel = true;
+
+	// // Blueprinted Version, relies on the asset path obtained from the editor
+	// static ConstructorHelpers::FClassFinder<ARHBasePlayer> PlayerPawnClassFinder(TEXT("/Game/Player/BP_SingleDoorFridge.BP_SingleDoorFridge"));
+	// if (PlayerPawnClassFinder.Succeeded())
+	// {
+	// 	DefaultPawnClass = PlayerPawnClassFinder.Class;
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogPlayer, Error, TEXT("Failed to find the player pawn bp class"));
+	// }
 }
 
 /**
@@ -246,3 +256,14 @@ UClass* ARHGameModeBase::GetPlayerClassForFridgeType(EFridgeType FridgeType) con
 }
 
 #pragma endregion
+
+UClass* ARHGameModeBase::GetDefaultPawnClassForController_Implementation(AController* InController)
+{
+	ARHEosPlayerState* playerState = InController->GetPlayerState<ARHEosPlayerState>();
+
+	if(playerState)
+		if (playerState->GetChosenCharacter())
+			return playerState->GetChosenCharacter();
+
+	return Super::GetDefaultPawnClassForController(InController);
+}

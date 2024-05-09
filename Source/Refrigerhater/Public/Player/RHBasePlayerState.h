@@ -24,7 +24,7 @@ class REFRIGERHATER_API ARHBasePlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "Team")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Team")
 	int32 Team = 1;
 	EFridgeType SelectedFridgeType;
 	bool Ready = false;

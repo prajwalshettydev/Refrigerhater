@@ -55,6 +55,11 @@ FString ARHGameStateBase::GetFormattedGameTime() const
 	return FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
 }
 
+void ARHGameStateBase::MulticastAnnounceWinner_Implementation(const bool bIsTeamA)
+{
+	OnGameAnnouncesWinner.Broadcast(bIsTeamA);
+}
+
 void ARHGameStateBase::OnRep_PlayersReady() const
 {
 	OnAllPlayersReady.Broadcast();
@@ -79,9 +84,10 @@ void ARHGameStateBase::Tick(float DeltaSeconds)
 					TimeSinceLastReplication = 0.0f;
 
 					// Ensure the game time does not drop below zero
-					if (GameTimeSeconds < 0)
+					if (GameTimeSeconds <= 0)
 					{
 						GameTimeSeconds = 0;
+						DeclareWinnerAndCleanup();
 					}
 				}
 			}
@@ -92,4 +98,19 @@ void ARHGameStateBase::Tick(float DeltaSeconds)
 			GameTimeSeconds = 240.0f; // Set to total round time (4 minutes)
 		}
 	}
+}
+
+void ARHGameStateBase::DeclareWinnerAndCleanup()
+{
+	// Determine the winning team
+	const bool bIsTeamAWinner = TeamAScore > TeamBScore;
+	//FString winner = isTeamAWinner ? TEXT("Team A Wins!") : TEXT("Team B Wins!");
+	
+	// Broadcast to all clients
+	MulticastAnnounceWinner(bIsTeamAWinner);
+
+	// Server side cleanup for next match
+	TeamAScore = 0;
+	TeamBScore = 0;
+	bArePlayersReady = false;
 }

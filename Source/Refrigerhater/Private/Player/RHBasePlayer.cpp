@@ -57,7 +57,7 @@ ARHBasePlayer::ARHBasePlayer()
 	bReplicates = true;
 
 	//Health = 100.f;
-	ResourceCapacity = 10; 
+	ResourceCapacity = 10;
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -94,7 +94,7 @@ ARHBasePlayer::ARHBasePlayer()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
-	
+
 	// Create the widget component and attach it to the player's root component
 	NameTagComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("NameTagComponent"));
 	NameTagComponent->SetupAttachment(RootComponent);
@@ -107,11 +107,11 @@ void ARHBasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(HasAuthority())
+	if (HasAuthority())
 	{
 		Health = MaxHealth;
 		UE_LOG(LogTemp, Warning, TEXT("Player health startnow: %f"), Health);
-		
+
 		// Randomize player color using HSV
 		const uint8 Hue = FMath::RandRange(0, 255);
 		constexpr uint8 Saturation = 255;
@@ -123,17 +123,20 @@ void ARHBasePlayer::BeginPlay()
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 3.0f, false);
 		PlayerName = "";
-		
+
 		CameraBoom->TargetArmLength = 6000.f;
 	}
 
-		
-	if (ActiveHealthBar == nullptr) {
-		ActiveHealthBar = CreateWidget<URHWorldWidget>(GetWorld(), HealthBarWidgetClass); //param owningobject here, CANNOT be "this"
+
+	if (ActiveHealthBar == nullptr)
+	{
+		ActiveHealthBar = CreateWidget<URHWorldWidget>(GetWorld(), HealthBarWidgetClass);
+		//param owningobject here, CANNOT be "this"
 		if (ActiveHealthBar)
 		{
 			ActiveHealthBar->AttachedActor = this;
-			ActiveHealthBar->AddToViewport(); //constructor of the UI widget will be called here. so set it's variable before that
+			ActiveHealthBar->AddToViewport();
+			//constructor of the UI widget will be called here. so set it's variable before that
 		}
 	}
 }
@@ -144,7 +147,7 @@ void ARHBasePlayer::InitializeNameTag()
 	RandomPlayerName.AppendInt(FMath::RandRange(10, 99));
 	PlayerName = RandomPlayerName;
 
-	if(HasAuthority())
+	if (HasAuthority())
 	{
 		//manually call on rep functions for server
 		OnRep_PlayerName();
@@ -185,11 +188,12 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 	FVector MuzzleLocation = GetActorLocation(); //+ FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
 	FRotator MuzzleRotation = Direction.Rotation();
 	UWorld* World = GetWorld();
-	
+
 	if (World != nullptr)
 	{
 		// Spawn the projectile at the muzzle.
-		if (ARHProjectile* Projectile = World->SpawnActor<ARHProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation))
+		if (ARHProjectile* Projectile = World->SpawnActor<ARHProjectile>(
+			ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
 			// Disable collision with the player immediately on spawn
 			Projectile->SetActorEnableCollision(false);
@@ -201,14 +205,15 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 					Projectile->SetActorEnableCollision(true);
 				}
 			}, 0.1f, false);
-			
-			
+
+
 			// Set the projectile's direction to the fire direction
 			Projectile->SetActorRotation(MuzzleRotation);
 			Projectile->SetLifeSpan(5.0f);
-			
+
 			// Draw a debug line for visualization
-			DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0, 5.0f);
+			DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0,
+			              5.0f);
 			DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
 		}
 	}
@@ -216,7 +221,6 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 
 void ARHBasePlayer::FireWeapon(const FVector& Direction)
 {
-
 	//todo: check if already too many projectiles exist or control fire rate here, and a validation in the server can be added too later.
 
 	UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
@@ -236,7 +240,8 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 		PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation); // Get the camera position and rotation
 
 		FVector WorldDirection;
-		PlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, CameraLocation, WorldDirection); // Calculate world direction
+		PlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, CameraLocation,
+		                                                 WorldDirection); // Calculate world direction
 
 		FVector EndPoint = CameraLocation + (WorldDirection * 10000); // Adjust length as needed
 
@@ -278,7 +283,8 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
  * @param DamageCauser 
  * @return 
  */
-float ARHBasePlayer::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+float ARHBasePlayer::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+                                class AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
@@ -296,7 +302,7 @@ float ARHBasePlayer::TakeDamage(float DamageAmount, struct FDamageEvent const& D
 		OnRep_Health(); // Manually call to update locally, replication handles remote updates
 	}
 
-	
+
 	return ActualDamage;
 }
 
@@ -310,9 +316,9 @@ void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
 	ControlRot.Roll = 0.0f;
-	
+
 	AddMovementInput(ControlRot.Vector(), MoveValue.Y);
-	
+
 	// x = forward (Red), y is right (Green), z is up (Blue)
 	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
 	AddMovementInput(RightVector, MoveValue.X);
@@ -321,7 +327,6 @@ void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 
 void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
 {
-	
 }
 
 void ARHBasePlayer::Generate(const FInputActionValue& InputActionValue)
@@ -344,22 +349,21 @@ void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if (GetWorld()->IsNetMode(NM_Client))
 	{
 		/* new input system */
-		// Get the player controller
 		APlayerController* PC = Cast<APlayerController>(GetController());
-	
-		// // Get the local player subsystem
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
-		// Clear out existing mapping, and add our mapping
+
+		//Get the local player subsystem
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+			PC->GetLocalPlayer());
 		Subsystem->ClearAllMappings();
 		Subsystem->AddMappingContext(InputMapping, 0);
-	
+
 		// Get the EnhancedInputComponent
 		UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	
-		//To keep in mind that the check macro should be used for conditions that should never fail during runtime. It is a debugging aid, and in shipping builds, the check is removed. Make sure to fix any issues that cause the check to fail before releasing your game.
+
+		//the check macro for* conditions that should never fail during runtime.
 		check(PEI && "PlayerInputComponent is not initialized");
 		check(InputActions && "PlayerInputActions is not initialized");
-	
+
 		// Bind the actions
 		PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ARHBasePlayer::Move);
 		PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ARHBasePlayer::Look);
@@ -402,13 +406,14 @@ void ARHBasePlayer::OnRep_PlayerColor()
 	if (PlayerMesh && PlayerMaterialInstance)
 	{
 		// Create a dynamic material instance from the assigned material instance
-		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(PlayerMaterialInstance, this);
-        
+		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
+			PlayerMaterialInstance, this);
+
 		if (DynamicMaterialInstance)
 		{
 			// Apply the dynamic material instance to the player mesh
 			PlayerMesh->SetMaterial(0, DynamicMaterialInstance);
-            
+
 			// Update the color on the dynamic material instance
 			DynamicMaterialInstance->SetVectorParameterValue(FName("BaseColor"), PlayerColor);
 		}
@@ -433,7 +438,7 @@ bool ARHBasePlayer::AddResource(EResourceType ResourceType, int32 Amount)
 }
 
 //server only
-int32  ARHBasePlayer::DropResources()
+int32 ARHBasePlayer::DropResources()
 {
 	const int32 TotalResources = ResourceInventory.Num(); // Get the count of all resources
 	ResourceInventory.Empty(); // Clear the inventory
@@ -464,8 +469,10 @@ void ARHBasePlayer::HandleDeath()
 
 	// Schedule respawn
 	FTimerHandle RespawnTimerHandle;
-	float RespawnDelay = 20.0f;  // Delay in seconds before respawning the player
-	GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, FTimerDelegate::CreateUObject(this, &ARHBasePlayer::Respawn), RespawnDelay, false);
+	float RespawnDelay = 20.0f; // Delay in seconds before respawning the player
+	GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle,
+	                                       FTimerDelegate::CreateUObject(this, &ARHBasePlayer::Respawn), RespawnDelay,
+	                                       false);
 }
 
 void ARHBasePlayer::Respawn()

@@ -54,16 +54,20 @@ FVector NormalImpulse, const FHitResult& Hit)
 	//only in server apply damage "GetLocalRole() == ROLE_Authority"
 	if (GetLocalRole() == ROLE_Authority && OtherActor && OtherActor != this && OtherActor != GetInstigator())
 	{
-		if (APawn* HitPawn = Cast<APawn>(OtherActor))
+		if (APawn* HitPawn = Cast<APawn>(OtherActor) )
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Applying damage: %f"), Damage);
-			UGameplayStatics::ApplyDamage(HitPawn, Damage, GetInstigatorController(), this, UDamageType::StaticClass());
+			if(HitPawn != GetInstigator())
+			{
+				UGameplayStatics::ApplyDamage(HitPawn, Damage, GetInstigatorController(), this, UDamageType::StaticClass());
+				
+			
+				SetLifeSpan(0.1);
+				HitComponent->SetNotifyRigidBodyCollision(false);
+			}
 		}
 
 		// Assume SpawnImpactEffects is another method you've implemented to handle visual/sound effects
 		//SpawnImpactEffects(Hit.ImpactPoint);
 
-		SetLifeSpan(0.1);
-		HitComponent->SetNotifyRigidBodyCollision(false);
 	}
 }

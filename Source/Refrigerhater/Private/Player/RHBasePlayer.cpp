@@ -183,14 +183,14 @@ bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
 
-	//FBoxSphereBounds Bounds = GetMesh()->Bounds;
-	//float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
+	FBoxSphereBounds Bounds = GetMesh()->Bounds;
+	float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
 	
-	// Compute the new muzzle location a bit forward from the actor's location
-	//FVector ForwardVector = GetActorForwardVector();
+	//Compute the new muzzle location a bit forward from the actor's location
+	FVector ForwardVector = GetActorForwardVector();
 
 	// Projectile spawn loc, can be weapon bone in the future
-	FVector MuzzleLocation = GetActorLocation(); //+ ForwardVector * ForwardBoundOffset;
+	FVector MuzzleLocation = GetActorLocation() + Direction * ForwardBoundOffset;
 	FRotator MuzzleRotation = Direction.Rotation();
 	UWorld* World = GetWorld();
 
@@ -200,6 +200,7 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 		if (ARHProjectile* Projectile = World->SpawnActor<ARHProjectile>(
 			ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
+			Projectile->SetInstigator(GetPlayerState()->GetPawn());
 			// Disable collision with the player immediately on spawn
 			Projectile->SetActorEnableCollision(true);
 			//FTimerHandle TimerHandle; // Set a timer to re-enable collision after a very short delay
@@ -217,8 +218,8 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 			Projectile->SetLifeSpan(5.0f);
 
 			// Draw a debug line for visualization
-			DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0,
-			              5.0f);
+			//DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0,
+			 //             5.0f);
 			//DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
 		}
 	}

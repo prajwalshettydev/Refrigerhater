@@ -113,15 +113,20 @@ void ARHGameModeBase::StartGameCustom()
 			// we are manually spawning the players here based on the teams they have selected
 			SpawnPlayerAtTeamStart(PlayerController); 
 		}
-		// Ensure the pawn is valid and then set the team color
-		if (ARHBasePlayer* PlayerPawn = Cast<ARHBasePlayer>(PlayerController->GetPawn()))
+		FTimerHandle TimerHandle; // Set a timer to re-enable collision after a very short delay
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [PlayerController, MyGameState]()
 		{
-			if (const ARHBasePlayerState* PlayerState = PlayerController->GetPlayerState<ARHBasePlayerState>())
+			if (ARHBasePlayer* PlayerPawn = Cast<ARHBasePlayer>(PlayerController->GetPawn()))
 			{
-				const FLinearColor TeamColor = (PlayerState->Team == 0) ? MyGameState->TeamAColor : MyGameState->TeamBColor;
-				PlayerPawn->SetTeamColor(TeamColor);
+				if (const ARHBasePlayerState* PlayerState = PlayerController->GetPlayerState<ARHBasePlayerState>())
+				{
+				
+					const FLinearColor TeamColor = (PlayerState->Team == 0) ? MyGameState->TeamAColor : MyGameState->TeamBColor;
+					PlayerPawn->SetTeamColor(TeamColor);
+				}
 			}
-		}
+		}, 0.5f, false);
+
 	}
 	
 	UE_LOG(LogPlayer, Log, TEXT("Everyones ready lets go"));

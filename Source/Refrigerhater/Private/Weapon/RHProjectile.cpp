@@ -12,16 +12,21 @@ ARHProjectile::ARHProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize components
-	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
-	RootComponent = ProjectileMesh;
-	ProjectileMesh->bApplyImpulseOnDamage = false;
 
 	// Create a simple sphere collider
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	CollisionComponent->InitSphereRadius(18.0f);
-	CollisionComponent->BodyInstance.SetCollisionProfileName("ProjectilePreset"); // Bind hit event
+	CollisionComponent->SetCollisionProfileName("ProjectilePreset"); // Bind hit event
+	//CollisionComponent->bApplyImpulseOnDamage = false;
+	//CollisionComponent->SetEnableGravity(true);
 	RootComponent = CollisionComponent;
-	CollisionComponent->bApplyImpulseOnDamage = false;
+	
+	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
+	//ProjectileMesh->bApplyImpulseOnDamage = false;
+	ProjectileMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	ProjectileMesh->SetupAttachment(CollisionComponent);
+	//CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
+
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 3000.f;
@@ -30,9 +35,9 @@ ARHProjectile::ARHProjectile()
 	ProjectileMovement->bShouldBounce = true;
 
 	// Set the scale of the collision capsule
-	ProjectileMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+	//ProjectileMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void ARHProjectile::BeginPlay()

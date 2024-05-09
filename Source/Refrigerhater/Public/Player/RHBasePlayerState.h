@@ -24,10 +24,13 @@ class REFRIGERHATER_API ARHBasePlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Team")
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite, Category = "Team")
 	int32 Team = 1;
 	EFridgeType SelectedFridgeType;
 	bool Ready = false;
 
 	float Health;
+
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

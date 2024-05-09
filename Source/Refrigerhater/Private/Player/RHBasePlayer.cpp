@@ -112,13 +112,6 @@ void ARHBasePlayer::BeginPlay()
 		Health = MaxHealth;
 		UE_LOG(LogTemp, Warning, TEXT("Player health startnow: %f"), Health);
 
-		// // Randomize player color using HSV
-		// const uint8 Hue = FMath::RandRange(0, 255);
-		// constexpr uint8 Saturation = 255;
-		// const uint8 Value = FMath::RandRange(160, 255); // Range from 180 to 255 to ensure brightness
-		//
-		// PlayerColor = FLinearColor::MakeFromHSV8(Hue, Saturation, Value);
-
 		// Delay the initialization of the name tag to ensure all components are ready
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARHBasePlayer::InitializeNameTag, 3.0f, false);
@@ -136,7 +129,6 @@ void ARHBasePlayer::BeginPlay()
 		{
 			ActiveHealthBar->AttachedActor = this;
 			ActiveHealthBar->AddToViewport();
-			//constructor of the UI widget will be called here. so set it's variable before that
 		}
 	}
 }
@@ -191,14 +183,14 @@ bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
 
-	FBoxSphereBounds Bounds = GetMesh()->Bounds;
-	float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
+	//FBoxSphereBounds Bounds = GetMesh()->Bounds;
+	//float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
 	
 	// Compute the new muzzle location a bit forward from the actor's location
-	FVector ForwardVector = GetActorForwardVector();
+	//FVector ForwardVector = GetActorForwardVector();
 
 	// Projectile spawn loc, can be weapon bone in the future
-	FVector MuzzleLocation = GetActorLocation() + ForwardVector * ForwardBoundOffset;
+	FVector MuzzleLocation = GetActorLocation(); //+ ForwardVector * ForwardBoundOffset;
 	FRotator MuzzleRotation = Direction.Rotation();
 	UWorld* World = GetWorld();
 
@@ -209,15 +201,15 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 			ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
 			// Disable collision with the player immediately on spawn
-			Projectile->SetActorEnableCollision(false);
-			FTimerHandle TimerHandle; // Set a timer to re-enable collision after a very short delay
-			World->GetTimerManager().SetTimer(TimerHandle, [Projectile]()
-			{
-				if (Projectile)
-				{
-					Projectile->SetActorEnableCollision(true);
-				}
-			}, 0.1f, false);
+			Projectile->SetActorEnableCollision(true);
+			//FTimerHandle TimerHandle; // Set a timer to re-enable collision after a very short delay
+			// World->GetTimerManager().SetTimer(TimerHandle, [Projectile]()
+			// {
+			// 	if (Projectile)
+			// 	{
+			// 		Projectile->SetActorEnableCollision(true);
+			// 	}
+			// }, 0.1f, false);
 
 
 			// Set the projectile's direction to the fire direction
@@ -227,7 +219,7 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 			// Draw a debug line for visualization
 			DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0,
 			              5.0f);
-			DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
+			//DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
 		}
 	}
 }
@@ -270,12 +262,12 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 			FVector FireDirection = (HitLocation - GetActorLocation()).GetSafeNormal();
 
 			// Optional: Draw debug line from camera to hit location
-			if (GEngine)
-			{
-				DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 20.0f);
-			}
-
-			DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.Location, FColor::Red, true, -1.0f, 0, 5.0f);
+			// if (GEngine)
+			// {
+			// 	DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 20.0f);
+			// }
+			//
+			// DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.Location, FColor::Red, true, -1.0f, 0, 5.0f);
 			// Now that we have the direction, fire the weapon in that direction
 			FireWeapon(FireDirection);
 		}

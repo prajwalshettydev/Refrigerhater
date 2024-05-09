@@ -56,7 +56,7 @@ ARHResourceBase::ARHResourceBase()
     MovementRange = 50.0f; // Set the range of movement
 
     
-    SetReplicates(true);
+    bReplicates = true;
 }
 
 // Called when the game starts or when spawned

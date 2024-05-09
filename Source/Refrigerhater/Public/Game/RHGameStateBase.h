@@ -21,7 +21,7 @@ class REFRIGERHATER_API ARHGameStateBase : public AGameStateBase
 	
 	float TimeSinceLastReplication = 0.0f;
 	float ReplicationInterval = 1.0f;
-	
+
 	ARHGameStateBase();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void Tick(float DeltaSeconds) override;
@@ -33,7 +33,13 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Score")
 	int32 TeamBScore;
-
+	
+	UPROPERTY()
+	FLinearColor TeamAColor = FLinearColor::Black;
+	
+	UPROPERTY()
+	FLinearColor TeamBColor = FLinearColor::White;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Resource Points")
 	TMap<EResourceType, EResourceCategory> ResourceCategories;
 	

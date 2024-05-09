@@ -103,6 +103,8 @@ void ARHGameModeBase::PostLogin(APlayerController* NewPlayer)
  */
 void ARHGameModeBase::StartGameCustom()
 {
+	// Fetch the appropriate team color from GameState and apply it
+	ARHGameStateBase* MyGameState = GetGameState<ARHGameStateBase>();
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		AController* PlayerController = It->Get();
@@ -111,16 +113,22 @@ void ARHGameModeBase::StartGameCustom()
 			// we are manually spawning the players here based on the teams they have selected
 			SpawnPlayerAtTeamStart(PlayerController); 
 		}
+		// Ensure the pawn is valid and then set the team color
+		if (ARHBasePlayer* PlayerPawn = Cast<ARHBasePlayer>(PlayerController->GetPawn()))
+		{
+			if (const ARHBasePlayerState* PlayerState = PlayerController->GetPlayerState<ARHBasePlayerState>())
+			{
+				const FLinearColor TeamColor = (PlayerState->Team == 0) ? MyGameState->TeamAColor : MyGameState->TeamBColor;
+				PlayerPawn->SetTeamColor(TeamColor);
+			}
+		}
 	}
 	
-	if (ARHGameStateBase* MyGameState = GetGameState<ARHGameStateBase>())
-	{
-		UE_LOG(LogPlayer, Log, TEXT("Everyones ready lets go"));
-		MyGameState->bArePlayersReady = true; // This will trigger OnRep_PlayersReady on all clients
+	UE_LOG(LogPlayer, Log, TEXT("Everyones ready lets go"));
+	MyGameState->bArePlayersReady = true; // This will trigger OnRep_PlayersReady on all clients
 
-		//force call on rep ready on the server too!
-		MyGameState->OnRep_PlayersReady(); 
-	}
+	//force call on rep ready on the server too!
+	MyGameState->OnRep_PlayersReady();
 }
 
 
@@ -140,10 +148,10 @@ void ARHGameModeBase::OnSpecificPlayerIsReady(const APlayerController* PlayerCon
 	}
 	
 	ARHBasePlayerState* PlayerState = PlayerController->GetPlayerState<ARHBasePlayerState>();
+	
 	PlayerState->Team = PlayerTeam;
 	PlayerState->SelectedFridgeType = FridgeType;
 	PlayerState->Ready = true;
-	
 
 	PlayerTeamAssignments.Add(PlayerController->PlayerState, PlayerTeam);
 	PlayerFridgeSelections.Add(PlayerController->PlayerState, FridgeType);

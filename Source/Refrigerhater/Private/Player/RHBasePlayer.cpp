@@ -112,12 +112,12 @@ void ARHBasePlayer::BeginPlay()
 		Health = MaxHealth;
 		UE_LOG(LogTemp, Warning, TEXT("Player health startnow: %f"), Health);
 
-		// Randomize player color using HSV
-		const uint8 Hue = FMath::RandRange(0, 255);
-		constexpr uint8 Saturation = 255;
-		const uint8 Value = FMath::RandRange(160, 255); // Range from 180 to 255 to ensure brightness
-
-		PlayerColor = FLinearColor::MakeFromHSV8(Hue, Saturation, Value);
+		// // Randomize player color using HSV
+		// const uint8 Hue = FMath::RandRange(0, 255);
+		// constexpr uint8 Saturation = 255;
+		// const uint8 Value = FMath::RandRange(160, 255); // Range from 180 to 255 to ensure brightness
+		//
+		// PlayerColor = FLinearColor::MakeFromHSV8(Hue, Saturation, Value);
 
 		// Delay the initialization of the name tag to ensure all components are ready
 		FTimerHandle TimerHandle;
@@ -141,6 +141,13 @@ void ARHBasePlayer::BeginPlay()
 	}
 }
 
+//executes in the server
+void ARHBasePlayer::SetTeamColor(const FLinearColor Color)
+{
+	PlayerColor = Color;
+	OnRep_PlayerColor();
+}
+
 void ARHBasePlayer::InitializeNameTag()
 {
 	FString RandomPlayerName = PossiblePlayerNames[FMath::RandRange(0, PossiblePlayerNames.Num() - 1)] + " ";
@@ -151,7 +158,6 @@ void ARHBasePlayer::InitializeNameTag()
 	{
 		//manually call on rep functions for server
 		OnRep_PlayerName();
-		OnRep_PlayerColor();
 	}
 }
 
@@ -184,8 +190,15 @@ bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
  */
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
+
+	FBoxSphereBounds Bounds = GetMesh()->Bounds;
+	float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
+	
+	// Compute the new muzzle location a bit forward from the actor's location
+	FVector ForwardVector = GetActorForwardVector();
+
 	// Projectile spawn loc, can be weapon bone in the future
-	FVector MuzzleLocation = GetActorLocation(); //+ FTransform(GetControlRotation()).TransformVector(MuzzleOffset);
+	FVector MuzzleLocation = GetActorLocation() + ForwardVector * ForwardBoundOffset;
 	FRotator MuzzleRotation = Direction.Rotation();
 	UWorld* World = GetWorld();
 

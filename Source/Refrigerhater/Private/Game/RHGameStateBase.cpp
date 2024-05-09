@@ -15,6 +15,23 @@ ARHGameStateBase::ARHGameStateBase()
 	ResourceCategories.Add(EResourceType::BeerCrate, EResourceCategory::Ordinary);
 	ResourceCategories.Add(EResourceType::TomatoCrate, EResourceCategory::Ordinary);
 	ResourceCategories.Add(EResourceType::BananaCrate, EResourceCategory::Ordinary);
+
+	if(HasAuthority())
+	{
+		// Randomize player color using HSV
+		const uint8 Hue1 = FMath::RandRange(0, 255);
+		constexpr uint8 Saturation1 = 255;
+		const uint8 Value1 = FMath::RandRange(160, 255); // Range from 180 to 255 to ensure brightness
+
+		TeamAColor = FLinearColor::MakeFromHSV8(Hue1, Saturation1, Value1);
+
+		// Randomize player color using HSV
+		const uint8 Hue2 = FMath::RandRange(0, 255);
+		constexpr uint8 Saturation2 = 255;
+		const uint8 Value2 = FMath::RandRange(160, 255); // Range from 180 to 255 to ensure brightness
+
+		TeamBColor = FLinearColor::MakeFromHSV8(Hue2, Saturation2, Value2);
+	}
 }
 
 
@@ -27,6 +44,8 @@ void ARHGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ARHGameStateBase, GameTimeSeconds);
 	DOREPLIFETIME(ARHGameStateBase, TeamAScore);
 	DOREPLIFETIME(ARHGameStateBase, TeamBScore);
+	//DOREPLIFETIME(ARHGameStateBase, TeamAColor);
+	//DOREPLIFETIME(ARHGameStateBase, TeamBColor);
 }
 
 // GameState.cpp

@@ -127,8 +127,12 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	UFUNCTION() //runs in server
+	UFUNCTION() //runs mostly in server
+	void SetTeamColor(FLinearColor Color);
+	
+	UFUNCTION() //runs mostly in server
 	bool AddResource(const EResourceType ResourceType, int32 Amount);
+	
 	int32 DropResources();
 	// Function to fire weapon
 	UFUNCTION(BlueprintCallable)

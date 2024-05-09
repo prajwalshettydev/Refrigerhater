@@ -39,12 +39,12 @@ protected:
 	virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 	FVector GetLevelCenter() const;
+	
+	UFUNCTION()
+	void OnResourceDropped(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+						   int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
-
-	UFUNCTION()
-	void OnResourceDropped(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool
-	                       bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void NotifyDropReceived(const FString& ResourceType, int32 Quantity);

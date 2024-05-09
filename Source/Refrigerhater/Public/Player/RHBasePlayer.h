@@ -83,7 +83,7 @@ public:
 	
 	// Resource inventory map
 	UPROPERTY(VisibleAnywhere, Category="Inventory")
-	TMap<EResourceType, int32> ResourceInventory;
+	TArray<EResourceType> ResourceInventory;
 
 	// Max inventory size
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
@@ -114,7 +114,6 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void InitializeNameTag();
 	void ProjectileSpawn(const FVector& Direction) const;
-	bool AddResource(const EResourceType ResourceType, int32 Amount);
 	void Move(const FInputActionValue& InputActionValue);
 	void Look(const FInputActionValue& InputActionValue);
 	void Tap(const FInputActionValue& InputActionValue);
@@ -131,6 +130,9 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
+	UFUNCTION() //runs in server
+	bool AddResource(const EResourceType ResourceType, int32 Amount);
+	int32 DropResources();
 	// Function to fire weapon
 	UFUNCTION(BlueprintCallable)
 	void FireWeapon(const FVector& Direction);

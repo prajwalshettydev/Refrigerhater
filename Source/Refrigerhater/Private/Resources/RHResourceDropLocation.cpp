@@ -6,6 +6,8 @@
 #include "RHGameModeBase.h"
 #include "Components/BoxComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Game/RHGameStateBase.h"
+#include "Player/RHBasePlayer.h"
 
 
 // Sets default values
@@ -60,8 +62,21 @@ void ARHResourceDropLocation::OnResourceDropped(UPrimitiveComponent* OverlappedC
 {
 	// This function would be triggered when a pawn enters the drop zone.
 	// Actual inventory checking and resource dropping logic should be handled here.
-	// Example:
-	// NotifyDropReceived("ResourceTypeExample", 1);
+
+	if(HasAuthority())
+	{
+		if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor) )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("resoussrce drop location overlap, %s "), *OtherActor->GetName());
+			const int32 points = Pawn->DropResources();
+
+			const ARHBasePlayerState* PS = Cast<ARHBasePlayerState>(Pawn->GetPlayerState());
+			ARHGameStateBase* GS = Cast<ARHGameStateBase>(GetWorld()->GetGameState());
+			if(PS->Team == 0)  GS->TeamAScore += points;
+			else GS->TeamBScore += points;
+
+		}
+	}
 }
 
 void ARHResourceDropLocation::NotifyDropReceived(const FString& ResourceType, int32 Quantity)

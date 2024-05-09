@@ -99,10 +99,16 @@ void ARHResourceBase::OnPickedUpBy(APawn* Pawn)
 void ARHResourceBase::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor))
+    if(!HasAuthority())
+        return;
+    
+    if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor) )
     {
         UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
-        OnPickedUpBy(Pawn);
+        if(Pawn->AddResource(ResourceType, 1))
+        {
+            OnPickedUpBy(Pawn);
+        }
     }
 }
  

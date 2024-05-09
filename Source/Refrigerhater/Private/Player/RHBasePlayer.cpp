@@ -424,19 +424,20 @@ void ARHBasePlayer::OnRep_Health()
 
 bool ARHBasePlayer::AddResource(EResourceType ResourceType, int32 Amount)
 {
-	int32 RequiredSpace = 4 * Amount;  // Each resource takes 4 slots
+	// Add the resource four times to the inventory
+	for (int i = 0; i < 4; ++i)
+	{
+		ResourceInventory.Add(ResourceType);
+	}
+	return true; // Always returns true as there's no limit checking
+}
 
-	if (ResourceInventory.Contains(ResourceType) && (ResourceInventory[ResourceType] + RequiredSpace <= MaxInventorySize))
-	{
-		ResourceInventory[ResourceType] += RequiredSpace;
-		return true;
-	}
-	else if (!ResourceInventory.Contains(ResourceType) && RequiredSpace <= MaxInventorySize)
-	{
-		ResourceInventory.Add(ResourceType, RequiredSpace);
-		return true;
-	}
-	return false; // Inventory full or addition exceeds max size
+//server only
+int32  ARHBasePlayer::DropResources()
+{
+	const int32 TotalResources = ResourceInventory.Num(); // Get the count of all resources
+	ResourceInventory.Empty(); // Clear the inventory
+	return TotalResources; // Return the total count of resources dropped
 }
 
 void ARHBasePlayer::HandleResourcePickup(const FString& ResourceType, int32 Amount)

@@ -44,8 +44,6 @@ void ARHGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ARHGameStateBase, GameTimeSeconds);
 	DOREPLIFETIME(ARHGameStateBase, TeamAScore);
 	DOREPLIFETIME(ARHGameStateBase, TeamBScore);
-	//DOREPLIFETIME(ARHGameStateBase, TeamAColor);
-	//DOREPLIFETIME(ARHGameStateBase, TeamBColor);
 }
 
 // GameState.cpp
@@ -93,16 +91,14 @@ void ARHGameStateBase::Tick(float DeltaSeconds)
 		// Check if the game has started
 		if (bArePlayersReady)
 		{
-			if (GameTimeSeconds > 0)  // Make sure the time doesn't go below zero
+			if (GameTimeSeconds > 0) 
 			{
 				TimeSinceLastReplication += DeltaSeconds;
 				if (TimeSinceLastReplication >= ReplicationInterval)
 				{
-					// Reduce the GameTimeSeconds by the time passed since last update
 					GameTimeSeconds -= TimeSinceLastReplication;
 					TimeSinceLastReplication = 0.0f;
-
-					// Ensure the game time does not drop below zero
+					
 					if (GameTimeSeconds <= 0)
 					{
 						GameTimeSeconds = 0;
@@ -113,8 +109,7 @@ void ARHGameStateBase::Tick(float DeltaSeconds)
 		}
 		else
 		{
-			// Reset the timer if the players are not ready
-			GameTimeSeconds = 120.0f; // Set to total round time (4 minutes)
+			GameTimeSeconds = 120.0f; // Set to total round time (2 minutes)
 		}
 	}
 }
@@ -123,8 +118,6 @@ void ARHGameStateBase::DeclareWinnerAndCleanup()
 {
 	// Determine the winning team
 	const bool bIsTeamAWinner = TeamAScore > TeamBScore;
-	//FString winner = isTeamAWinner ? TEXT("Team A Wins!") : TEXT("Team B Wins!");
-	
 	// Broadcast to all clients
 	MulticastAnnounceWinner(bIsTeamAWinner);
 

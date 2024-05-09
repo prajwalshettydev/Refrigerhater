@@ -8,24 +8,16 @@
 // Sets default values
 ARHProjectile::ARHProjectile()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Initialize components
-
-	// Create a simple sphere collider
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	CollisionComponent->InitSphereRadius(18.0f);
-	CollisionComponent->SetCollisionProfileName("ProjectilePreset"); // Bind hit event
-	//CollisionComponent->bApplyImpulseOnDamage = false;
-	//CollisionComponent->SetEnableGravity(true);
+	CollisionComponent->SetCollisionProfileName("ProjectilePreset"); 
 	RootComponent = CollisionComponent;
 	
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
-	//ProjectileMesh->bApplyImpulseOnDamage = false;
 	ProjectileMesh->SetCollisionProfileName(TEXT("NoCollision"));
 	ProjectileMesh->SetupAttachment(CollisionComponent);
-	//CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
 
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
@@ -33,9 +25,6 @@ ARHProjectile::ARHProjectile()
 	ProjectileMovement->MaxSpeed = 3000.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
-
-	// Set the scale of the collision capsule
-	//ProjectileMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	
 	bReplicates = true;
 }
@@ -51,7 +40,6 @@ void ARHProjectile::BeginPlay()
 void ARHProjectile::HitMesh(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 FVector NormalImpulse, const FHitResult& Hit)
 {
-	//only in server apply damage "GetLocalRole() == ROLE_Authority"
 	if (GetLocalRole() == ROLE_Authority && OtherActor && OtherActor != this && OtherActor != GetInstigator())
 	{
 		if (APawn* HitPawn = Cast<APawn>(OtherActor) )
@@ -65,9 +53,5 @@ FVector NormalImpulse, const FHitResult& Hit)
 				HitComponent->SetNotifyRigidBodyCollision(false);
 			}
 		}
-
-		// Assume SpawnImpactEffects is another method you've implemented to handle visual/sound effects
-		//SpawnImpactEffects(Hit.ImpactPoint);
-
 	}
 }

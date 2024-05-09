@@ -25,38 +25,22 @@
 
 #pragma region init
 
-// List of potential player names
+// List of player names
 static const TArray<FString> PossiblePlayerNames = {
 	TEXT("Maverick"), TEXT("Prajwal"), TEXT("Asheen"),
-	TEXT("Phoenix"),
-	TEXT("Vortex"),
-	TEXT("Blaze"),
-	TEXT("Striker"),
-	TEXT("Orion"),
-	TEXT("Talon"),
-	TEXT("Raven"),
-	TEXT("Zephyr"),
-	TEXT("Drifter"),
-	TEXT("Marauder"),
-	TEXT("Shadow"),
-	TEXT("Fury"),
-	TEXT("Raptor"),
-	TEXT("Sable"),
-	TEXT("Volt"),
-	TEXT("Phantom"),
-	TEXT("Specter"),
-	TEXT("Rogue"),
-	TEXT("Eclipse"),
-	TEXT("Titan"),
-	TEXT("Nomad")
+	TEXT("Phoenix"), TEXT("Vortex"), TEXT("Blaze"),
+	TEXT("Striker"), TEXT("Orion"), TEXT("Talon"),
+	TEXT("Raven"), TEXT("Zephyr"), TEXT("Drifter"),
+	TEXT("Marauder"), TEXT("Shadow"), TEXT("Fury"),
+	TEXT("Raptor"), TEXT("Sable"), TEXT("Volt"),
+	TEXT("Phantom"), TEXT("Specter"), TEXT("Rogue"),
+	TEXT("Eclipse"), TEXT("Titan"), TEXT("Nomad")
 };
 
 // Sets default values
 ARHBasePlayer::ARHBasePlayer()
 {
 	bReplicates = true;
-
-	//Health = 100.f;
 	ResourceCapacity = 10;
 
 	// Set size for player capsule
@@ -182,36 +166,21 @@ bool ARHBasePlayer::ServerFireWeapon_Validate(const FVector& Direction)
  */
 void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 {
-
-	FBoxSphereBounds Bounds = GetMesh()->Bounds;
-	float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
-	
-	//Compute the new muzzle location a bit forward from the actor's location
-	FVector ForwardVector = GetActorForwardVector();
+	const FBoxSphereBounds Bounds = GetMesh()->Bounds;
+	const float ForwardBoundOffset = Bounds.BoxExtent.X + 2.0f; //X extent for forward direction, plus a little extra
 
 	// Projectile spawn loc, can be weapon bone in the future
-	FVector MuzzleLocation = GetActorLocation() + Direction * ForwardBoundOffset;
-	FRotator MuzzleRotation = Direction.Rotation();
-	UWorld* World = GetWorld();
+	const FVector MuzzleLocation = GetActorLocation() + Direction * ForwardBoundOffset;
+	const FRotator MuzzleRotation = Direction.Rotation();
 
-	if (World != nullptr)
+	if (UWorld* World = GetWorld(); World != nullptr)
 	{
 		// Spawn the projectile at the muzzle.
 		if (ARHProjectile* Projectile = World->SpawnActor<ARHProjectile>(
 			ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
 			Projectile->SetInstigator(GetPlayerState()->GetPawn());
-			// Disable collision with the player immediately on spawn
 			Projectile->SetActorEnableCollision(true);
-			//FTimerHandle TimerHandle; // Set a timer to re-enable collision after a very short delay
-			// World->GetTimerManager().SetTimer(TimerHandle, [Projectile]()
-			// {
-			// 	if (Projectile)
-			// 	{
-			// 		Projectile->SetActorEnableCollision(true);
-			// 	}
-			// }, 0.1f, false);
-
 
 			// Set the projectile's direction to the fire direction
 			Projectile->SetActorRotation(MuzzleRotation);
@@ -219,7 +188,7 @@ void ARHBasePlayer::ProjectileSpawn(const FVector& Direction) const
 
 			// Draw a debug line for visualization
 			//DrawDebugLine(GetWorld(), MuzzleLocation, MuzzleLocation + Direction * 1000, FColor::Green, true, 20.0f, 0,
-			 //             5.0f);
+			//             5.0f);
 			//DrawDebugSphere(GetWorld(), MuzzleLocation + Direction * 1000, 32.0f, 32, FColor::Red, true, 20.0f);
 		}
 	}
@@ -229,7 +198,6 @@ void ARHBasePlayer::FireWeapon(const FVector& Direction)
 {
 	//todo: check if already too many projectiles exist or control fire rate here, and a validation in the server can be added too later.
 
-	UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 	ServerFireWeapon(Direction);
 }
 
@@ -258,18 +226,9 @@ void ARHBasePlayer::Tap(const FInputActionValue& InputActionValue)
 		// Perform the raycast
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, CameraLocation, EndPoint, ECC_Visibility, QueryParams))
 		{
-			// We hit something
 			FVector HitLocation = HitResult.Location;
 			FVector FireDirection = (HitLocation - GetActorLocation()).GetSafeNormal();
-
-			// Optional: Draw debug line from camera to hit location
-			// if (GEngine)
-			// {
-			// 	DrawDebugSphere(GetWorld(), HitLocation, 16.0f, 4, FColor::Blue, false, 20.0f);
-			// }
-			//
-			// DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.Location, FColor::Red, true, -1.0f, 0, 5.0f);
-			// Now that we have the direction, fire the weapon in that direction
+			
 			FireWeapon(FireDirection);
 		}
 	}
@@ -328,7 +287,6 @@ void ARHBasePlayer::Move(const FInputActionValue& InputActionValue)
 	// x = forward (Red), y is right (Green), z is up (Blue)
 	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
 	AddMovementInput(RightVector, MoveValue.X);
-	//}
 }
 
 void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
@@ -381,11 +339,9 @@ void ARHBasePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void ARHBasePlayer::OnRep_PlayerName()
 {
 	// Update the widget with the new player name
-	UUserWidget* NameTagWidget = NameTagComponent->GetUserWidgetObject();
-	if (NameTagWidget)
+	if (const UUserWidget* NameTagWidget = NameTagComponent->GetUserWidgetObject())
 	{
-		UTextBlock* NameText = Cast<UTextBlock>(NameTagWidget->GetWidgetFromName(TEXT("NameText")));
-		if (NameText)
+		if (UTextBlock* NameText = Cast<UTextBlock>(NameTagWidget->GetWidgetFromName(TEXT("NameText"))))
 		{
 			NameText->SetText(FText::FromString(PlayerName));
 		}
@@ -397,10 +353,9 @@ void ARHBasePlayer::OnRep_PlayerColor()
 	if (PlayerMesh && PlayerMaterialInstance)
 	{
 		// Create a dynamic material instance from the assigned material instance
-		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
-			PlayerMaterialInstance, this);
 
-		if (DynamicMaterialInstance)
+		if (UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
+			PlayerMaterialInstance, this))
 		{
 			// Apply the dynamic material instance to the player mesh
 			PlayerMesh->SetMaterial(0, DynamicMaterialInstance);
@@ -420,14 +375,14 @@ void ARHBasePlayer::OnRep_Health()
 
 bool ARHBasePlayer::AddResource(EResourceType ResourceType, int32 Amount)
 {
-	if(ResourceInventory.Num() + 4 > MaxInventorySize)
+	if (ResourceInventory.Num() + 4 > MaxInventorySize)
 		return false;
-	
+
 	for (int i = 0; i < 4; ++i)
 	{
 		ResourceInventory.Add(ResourceType);
 	}
-	return true; 
+	return true;
 }
 
 //server only

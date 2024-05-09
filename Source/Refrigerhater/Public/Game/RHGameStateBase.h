@@ -7,7 +7,6 @@
 #include "Resources/RHResourceBase.h"
 #include "RHGameStateBase.generated.h"
 
-//more on delegates in readme!! 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllPlayersReady);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameAnnouncesWinner, bool, isTeamA);
 

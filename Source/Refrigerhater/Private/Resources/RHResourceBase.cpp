@@ -5,7 +5,6 @@
 
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Player/RHBasePlayer.h"
 
@@ -17,7 +16,6 @@
 // Sets default values
 ARHResourceBase::ARHResourceBase()
 {
-    // Set this actor to call Tick() every frame.
     PrimaryActorTick.bCanEverTick = true;
 
     // Create and initialize the sphere collision component
@@ -25,7 +23,6 @@ ARHResourceBase::ARHResourceBase()
     CollisionComponent->InitBoxExtent(FVector(25,25,25));
     CollisionComponent->SetCollisionProfileName(TEXT("ResourcePreset"));
     CollisionComponent->SetEnableGravity(true);
-    //CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARHResourceBase::OnOverlapBegin); 
     RootComponent = CollisionComponent;
 
     // Create and initialize the mesh component
@@ -34,11 +31,11 @@ ARHResourceBase::ARHResourceBase()
     MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 
     // Create and initialize the particle system component
+    // No particles assigned at this state of the project though
+    // it would have been nice to spawn them
     ParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleSystemComponent"));
     ParticleSystemComponent->SetupAttachment(MeshComponent);
-    // Set a default particle system, replace with your particle asset;
 
-    // Ensure that the actor can be detected by raycasts and overlaps
     CollisionComponent->SetVisibility(true);
     CollisionComponent->SetSimulatePhysics(true);
     
@@ -65,7 +62,7 @@ void ARHResourceBase::BeginPlay()
     Super::BeginPlay();
     
     CollisionComponent->OnComponentBeginOverlap.AddDynamic(this,&ARHResourceBase::OverlapBegin);
-    //
+    
     BaseZ = ArrowComponent->GetComponentLocation().Z;
 }
 
@@ -92,7 +89,6 @@ void ARHResourceBase::Tick(float DeltaTime)
 
 void ARHResourceBase::OnPickedUpBy(APawn* Pawn)
 {
-    // You could add logic here to give resources to the fridge, then destroy or hide this actor
     Destroy();
 }
 
@@ -104,7 +100,6 @@ UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHi
     
     if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor) )
     {
-        UE_LOG(LogTemp, Warning, TEXT("resoussrce successfull overlap, %s "), *OtherActor->GetName());
         if(Pawn->AddResource(ResourceType, 1))
         {
             OnPickedUpBy(Pawn);

@@ -11,7 +11,6 @@
 // Sets default values
 ARHGlobalResourceManager::ARHGlobalResourceManager()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize the BoxComponent
@@ -40,10 +39,8 @@ void ARHGlobalResourceManager::BeginPlay()
 
 void ARHGlobalResourceManager::SpawnResource1()
 {
-	int32 ResourcesToSpawn = 6;  // Number of resources to spawn each time function is called
-
 	// Only spawn if it does not exceed the maximum count
-	if (SpawnedResources1.Num() + ResourcesToSpawn <= MaxResource1Count)
+	if (const int32 ResourcesToSpawn = 6; SpawnedResources1.Num() + ResourcesToSpawn <= MaxResource1Count)
 	{
 		for (int32 i = 0; i < ResourcesToSpawn; i++)
 		{

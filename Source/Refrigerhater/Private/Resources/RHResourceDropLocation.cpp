@@ -26,8 +26,8 @@ ARHResourceDropLocation::ARHResourceDropLocation()
 	TextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextComponent"));
 	TextComponent->SetupAttachment(RootComponent);
 	TextComponent->SetText(FText::FromString(TEXT("Drop Location")));
-	TextComponent->SetWorldSize(100.0f);  // Adjust size as needed
-	TextComponent->SetRelativeLocation(FVector(0, 0, 100));  // Adjust to position text above the mesh
+	TextComponent->SetWorldSize(100.0f);  
+	TextComponent->SetRelativeLocation(FVector(0, 0, 100));  
 }
 
 void ARHResourceDropLocation::BeginPlay()
@@ -54,20 +54,16 @@ void ARHResourceDropLocation::Tick(float DeltaTime)
 
 FVector ARHResourceDropLocation::GetLevelCenter() const
 {
-	// Placeholder for getting the center of the level; adjust as necessary
+	// Placeholder, can be changed in the future
 	return FVector(0.0f, 0.0f, 0.0f);
 }
 
 void ARHResourceDropLocation::OnResourceDropped(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// This function would be triggered when a pawn enters the drop zone.
-	// Actual inventory checking and resource dropping logic should be handled here.
-
 	if(HasAuthority())
 	{
 		if (ARHBasePlayer* Pawn = Cast<ARHBasePlayer>(OtherActor) )
 		{
-			UE_LOG(LogTemp, Warning, TEXT("resoussrce drop location overlap, %s "), *OtherActor->GetName());
 			const int32 points = Pawn->DropResources();
 
 			const ARHBasePlayerState* PS = Cast<ARHBasePlayerState>(Pawn->GetPlayerState());
@@ -79,17 +75,15 @@ void ARHResourceDropLocation::OnResourceDropped(UPrimitiveComponent* OverlappedC
 	}
 }
 
+//no longer used, i have moved this to OnResourceDropped
 void ARHResourceDropLocation::NotifyDropReceived(const FString& ResourceType, int32 Quantity)
 {
-	// Here you would contact the GameMode to update points or similar
-	// This must run on the server where the GameMode exists
 	if (HasAuthority())
 	{
-		// Cast to your custom GameMode and call a function to handle the score update
 		ARHGameModeBase* GM = Cast<ARHGameModeBase>(GetWorld()->GetAuthGameMode());
 		if (GM)
 		{
-			//GM->AddPointsForTeam(ResourceType, Quantity, GetTeamID());  // Implement this function in your GameMode
+			//GM->AddPointsForTeam(ResourceType, Quantity, GetTeamID()); 
 		}
 	}
 }

@@ -15,7 +15,6 @@
 
 ARHGameModeBase::ARHGameModeBase()
 {
-	//Setup all the default classes for the game mode
 	PlayerControllerClass = ARHBasePlayerController::StaticClass();
 	DefaultPawnClass = ARHBasePlayer::StaticClass();
 	PlayerStateClass = ARHBasePlayerState::StaticClass();
@@ -25,33 +24,6 @@ ARHGameModeBase::ARHGameModeBase()
 	
 	CacheTeamSpawnPoints();
 }
-
-// APlayerController* ARHGameModeBase::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
-// {
-// 	// Check if we are on a dedicated server and trying to spawn a player for it
-// 	if (IsRunningDedicatedServer() && InRemoteRole < ROLE_AutonomousProxy)
-// 	{
-// 		// Prevent player creation for the server
-// 		return nullptr;
-// 	}
-//
-// 	// Call the base method to continue with normal player spawning
-// 	return Super::Login(NewPlayer, InRemoteRole, Portal, Options, UniqueId, ErrorMessage);
-// }
-
-// int32 ARHGameModeBase::GetNumPlayers()
-// {
-// 	int32 PlayerCount = 0;
-// 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-// 	{
-// 		APlayerController* PC = It->Get();
-// 		if (PC && PC->IsLocalPlayerController()) // Ensures counting only actual players
-// 		{
-// 			PlayerCount++;
-// 		}
-// 	}
-// 	return PlayerCount;
-// }
 
 /**
  * Cache team spawn points just once during construction
@@ -88,13 +60,9 @@ void ARHGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	// Make sure the cast was successful and the pawn is valid
 	if (const ARHBasePlayer* NewPlayerPawn = Cast<ARHBasePlayer>(NewPlayer->GetPawn()))
 	{
 		UE_LOG(LogPlayer, Log, TEXT("Player Connected %s"), *NewPlayerPawn->PlayerName);
-		
-		// Now call the function on the pawn that updates all clients with the initial state
-		//NewPlayerPawn->UpdateAllClientsWithInitialState();
 	}
 }
 
@@ -169,8 +137,7 @@ void ARHGameModeBase::OnSpecificPlayerIsReady(const APlayerController* PlayerCon
 
 void ARHGameModeBase::AddPointsForTeam(const FString& ResourceType, int32 Quantity, int32 TeamID)
 {
-	// Implement logic to add points based on the resource type and quantity
-	// Example: update a team's score
+	//no longer needed
 }
 
 #pragma region helpers 
@@ -198,8 +165,8 @@ bool ARHGameModeBase::AreAllPlayersReady()
 
 bool ARHGameModeBase::IsTeamAndFridgeValid(int32 PlayerTeam, const EFridgeType FridgeType)
 {
-	// Implement checks for team limits and fridge type validity
-	return true; // Simplified for example
+	//can be extended in the future
+	return true; 
 }
 
 void ARHGameModeBase::SpawnPlayerAtTeamStart(AController* Controller)
@@ -230,7 +197,6 @@ AActor* ARHGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 			return (*TeamSpawnPoints)[Index];
 		}
 	}
-	//return nullptr; // Fallback if no spawn points found
 
 	// Fallback to default logic
 	return Super::ChoosePlayerStart_Implementation(Player);

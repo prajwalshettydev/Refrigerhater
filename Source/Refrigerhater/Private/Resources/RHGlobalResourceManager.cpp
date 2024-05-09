@@ -91,6 +91,6 @@ void ARHGlobalResourceManager::SpawnResourceAtLocation(const TArray<TSubclassOf<
 //alias, on game starts!!
 void ARHGlobalResourceManager::OnAllPlayersReady()
 {
-	GetWorldTimerManager().SetTimer(TimerHandle_Resource1, this, &ARHGlobalResourceManager::SpawnResource1, 30.0f, true, 0.0f);
-	GetWorldTimerManager().SetTimer(TimerHandle_Resource2, this, &ARHGlobalResourceManager::SpawnResource2, 30.0f, true, 120.0f);
+	GetWorldTimerManager().SetTimer(TimerHandle_Resource1, this, &ARHGlobalResourceManager::SpawnResource1, 18.0f, true, 0.0f);
+	GetWorldTimerManager().SetTimer(TimerHandle_Resource2, this, &ARHGlobalResourceManager::SpawnResource2, 20.0f, true, 60.0f);
 }

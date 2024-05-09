@@ -95,7 +95,7 @@ void ARHGameStateBase::Tick(float DeltaSeconds)
 		else
 		{
 			// Reset the timer if the players are not ready
-			GameTimeSeconds = 240.0f; // Set to total round time (4 minutes)
+			GameTimeSeconds = 120.0f; // Set to total round time (4 minutes)
 		}
 	}
 }

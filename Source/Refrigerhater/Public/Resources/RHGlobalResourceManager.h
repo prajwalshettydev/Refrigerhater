@@ -29,7 +29,7 @@ protected:
 	class UBoxComponent* SpawnVolume;
 
 	UPROPERTY(EditAnywhere, Category = "Resources")
-	int32 MaxResource1Count = 20;
+	int32 MaxResource1Count = 22;
 
 	UPROPERTY(EditAnywhere, Category = "Resources")
 	int32 MaxResource2Count = 7;

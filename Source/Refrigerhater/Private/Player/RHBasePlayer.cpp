@@ -329,18 +329,6 @@ void ARHBasePlayer::Look(const FInputActionValue& InputActionValue)
 {
 }
 
-void ARHBasePlayer::Generate(const FInputActionValue& InputActionValue)
-{
-}
-
-void ARHBasePlayer::MoveUpDown(const FInputActionValue& InputActionValue)
-{
-}
-
-void ARHBasePlayer::ChangeMoveSpeed(const FInputActionValue& InputActionValue)
-{
-}
-
 // Called to bind functionality to input
 void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -368,9 +356,6 @@ void ARHBasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ARHBasePlayer::Move);
 		PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ARHBasePlayer::Look);
 		PEI->BindAction(InputActions->InputTap, ETriggerEvent::Triggered, this, &ARHBasePlayer::Tap);
-		PEI->BindAction(InputActions->InputGenerate, ETriggerEvent::Started, this, &ARHBasePlayer::Generate);
-		PEI->BindAction(InputActions->InputMoveUpDown, ETriggerEvent::Triggered, this, &ARHBasePlayer::MoveUpDown);
-		PEI->BindAction(InputActions->InputMoveSpeed, ETriggerEvent::Triggered, this, &ARHBasePlayer::ChangeMoveSpeed);
 	}
 }
 
@@ -429,12 +414,14 @@ void ARHBasePlayer::OnRep_Health()
 
 bool ARHBasePlayer::AddResource(EResourceType ResourceType, int32 Amount)
 {
-	// Add the resource four times to the inventory
+	if(ResourceInventory.Num() + 4 > MaxInventorySize)
+		return false;
+	
 	for (int i = 0; i < 4; ++i)
 	{
 		ResourceInventory.Add(ResourceType);
 	}
-	return true; // Always returns true as there's no limit checking
+	return true; 
 }
 
 //server only

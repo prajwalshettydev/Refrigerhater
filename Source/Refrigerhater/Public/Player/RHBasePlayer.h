@@ -117,9 +117,6 @@ private:
 	void Move(const FInputActionValue& InputActionValue);
 	void Look(const FInputActionValue& InputActionValue);
 	void Tap(const FInputActionValue& InputActionValue);
-	void Generate(const FInputActionValue& InputActionValue);
-	void MoveUpDown(const FInputActionValue& InputActionValue);
-	void ChangeMoveSpeed(const FInputActionValue& InputActionValue);
 	void HandleDeath();
 	void Respawn();
 	
